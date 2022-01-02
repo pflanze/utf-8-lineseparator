@@ -243,7 +243,7 @@ int report(const char* instr, FILE* in) {
             const char *questionable =
                 (linecount == MAX3(LFcount, CRcount, CRLFcount)) ? "" : "?";
             fprintf(stderr,
-                    "utf-8-crlf %s: %s at character #%li (line %li%s, column %li%s)\n",
+                    "utf-8-lineseparator %s: %s at character #%li (line %li%s, column %li%s)\n",
                     instr,
                     c.failure.str,
                     charcount + 1,
