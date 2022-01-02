@@ -188,7 +188,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
         } else {
             return Error(
                 Maybe_u32, false,
-                "invalid start byte decoding UTF-8 (byte 1)");
+                "invalid start byte decoding UTF-8");
         }
         for (int i = 1; i < numbytes; i++) {
             Result_Maybe_u8 b = getc_Result(in);
@@ -196,14 +196,14 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
             if (b.ok.is_nothing) {
                 char msg[EBUFSIZ];
                 snprintf(msg, EBUFSIZ,
-                         "premature EOF decoding UTF-8 (byte %i)",
+                         "premature EOF decoding UTF-8 (byte #%i)",
                          i+1);
                 return Error(Maybe_u32, true, xstrdup(msg));
             }
             if ((b.ok.value & 0b11000000) != 0b10000000) {
                 char msg[EBUFSIZ];
                 snprintf(msg, EBUFSIZ,
-                         "invalid continuation byte decoding UTF-8 (byte %i)",
+                         "invalid continuation byte decoding UTF-8 (byte #%i)",
                          i+1);
                 return Error(Maybe_u32, true, xstrdup(msg));
             }
