@@ -12,17 +12,20 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+static
 void die_outofmemory() {
     fprintf(stderr, "Out of memory, aborting\n");
     abort();
 }
 
+static
 char *xstrdup(const char *str) {
     char *res= strdup(str);
     if (!res) die_outofmemory();
     return res;
 }
 
+static
 int perror_str(const char *fmt, const char *arg1) {
 #define EBUFSIZ 256
     char msg[EBUFSIZ];
@@ -44,12 +47,14 @@ typedef struct {
         free((void*)(s).str);                   \
     }
     
+static
 int perror_string(const char *fmt, String str /* taking ownership */) {
     int res = perror_str(fmt, str.str);
     string_release(str);
     return res;
 }
 
+static
 String string_quote_sh(const char *str) {
 #define QBUFSIZ 1024
     char out[QBUFSIZ];
@@ -137,6 +142,7 @@ typedef uint32_t u32;
 DEFTYPE_Maybe_(u8);
 DEFTYPE_Result_(Maybe_u8);
 
+static
 Result_Maybe_u8 getc_Result(FILE *in) {
     int c = getc(in);
     if (c == EOF) {
@@ -158,6 +164,7 @@ DEFTYPE_Result_(Maybe_u32);
 
 // XXX TODO: handle Byte order mark?
 
+static
 Result_Maybe_u32 get_unicodechar(FILE *in) {
     // https://en.wikipedia.org/wiki/Utf-8#Encoding
 #define EBUFSIZ 256
@@ -215,6 +222,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
 #undef EBUFSIZ
 }
 
+static
 int report(const char* instr, FILE* in) {
     int64_t charcount = 0;
     int64_t LFcount = 0;
