@@ -12,6 +12,17 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+void die_outofmemory() {
+    fprintf(stderr, "Out of memory, aborting\n");
+    abort();
+}
+
+char *xstrdup(const char *str) {
+    char *res= strdup(str);
+    if (!res) die_outofmemory();
+    return res;
+}
+
 
 typedef struct {
     bool needs_free;
@@ -76,8 +87,7 @@ Result_Maybe_u8 getc_Result(FILE *in) {
 #define EBUFSIZ 256
             char msg[EBUFSIZ];
             strerror_r(errno, msg, EBUFSIZ);
-            // Error-check strerr_r and strdup, or leave as is?
-            return Error(Maybe_u8, true, strdup(msg));
+            return Error(Maybe_u8, true, xstrdup(msg));
 #undef EBUFSIZ
         }
         return Ok(Maybe_u8) Nothing(u8) EndOk;
@@ -124,14 +134,14 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
                 snprintf(msg, EBUFSIZ,
                          "premature EOF decoding UTF-8 (byte %i)",
                          i+1);
-                return Error(Maybe_u32, true, strdup(msg));
+                return Error(Maybe_u32, true, xstrdup(msg));
             }
             if ((b.ok.value & 0b11000000) != 0b10000000) {
                 char msg[EBUFSIZ];
                 snprintf(msg, EBUFSIZ,
                          "invalid continuation byte decoding UTF-8 (byte %i)",
                          i+1);
-                return Error(Maybe_u32, true, strdup(msg));
+                return Error(Maybe_u32, true, xstrdup(msg));
             }
             codepoint |= ((b.ok.value & 0b00111111) << (i * 6 + 1));
         }
@@ -143,7 +153,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
         snprintf(msg, EBUFSIZ,
                  "invalid unicode codepoint (%ui)",
                  codepoint);
-        return Error(Maybe_u32, true, strdup(msg));
+        return Error(Maybe_u32, true, xstrdup(msg));
     }
 #undef EBUFSIZ
 }
