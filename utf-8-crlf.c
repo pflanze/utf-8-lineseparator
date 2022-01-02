@@ -23,11 +23,70 @@ char *xstrdup(const char *str) {
     return res;
 }
 
+int perror_str(const char *fmt, const char *arg1) {
+#define EBUFSIZ 256
+    char msg[EBUFSIZ];
+    strerror_r(errno, msg, EBUFSIZ);
+    int res = fprintf(stderr, fmt, arg1);
+    if (res < 0) return res;
+    return fprintf(stderr, ": %s\n", msg);
+#undef EBUFSIZ
+}
+
 
 typedef struct {
     bool needs_free;
     const char* str;
 } String;
+
+#define string_release(s)                       \
+    if ((s).needs_free) {                       \
+        free((void*)(s).str);                   \
+    }
+    
+int perror_string(const char *fmt, String str /* taking ownership */) {
+    int res = perror_str(fmt, str.str);
+    string_release(str);
+    return res;
+}
+
+String string_quote_sh(const char *str) {
+#define QBUFSIZ 1024
+    char out[QBUFSIZ];
+    int out_i = 0;
+#define PUSH(c)                                     \
+    if (out_i < (QBUFSIZ-3-1-1)) {                  \
+        out[out_i++] = c;                           \
+    } else {                                        \
+        goto push_error;                            \
+    }
+
+    size_t len = strlen(str);
+    PUSH('\'');
+    for (int i = 0; i < len; i++) {
+        char c = str[i];
+        if (c == '\'') {
+            PUSH('\'');
+            PUSH('\\');
+            PUSH('\'');
+            PUSH('\'');
+        } else {
+            PUSH(c);
+        }
+    }
+    PUSH('\'');
+    goto finish;
+push_error:
+    out[out_i++] = '\'';
+    out[out_i++] = '.';
+    out[out_i++] = '.';
+    out[out_i++] = '.';
+finish:
+    out[out_i++] = '\0';
+    return (String) { true, xstrdup(out) };
+#undef QBUFSIZ
+}
+
 
 #define DEFTYPE_Result_(T)                      \
     typedef struct {                            \
@@ -45,9 +104,7 @@ typedef struct {
 #define result_is_failure(v) (!!((v).failure.str))
 // #define result_failure_str(v) ((v).failure.str)
 #define result_release(v)                       \
-    if ((v).failure.needs_free) {               \
-        free((void*)(v).failure.str);           \
-    }
+    string_release((v).failure)
 #define result_print_failure(fmt, v)            \
     fprintf(stderr, fmt, (v).failure.str)
 
@@ -158,14 +215,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
 #undef EBUFSIZ
 }
 
-
-int main(int argc, const char**argv) {
-    const char *path = argv[1];
-    FILE *in = fopen(path, "r");
-    if (!in) {
-        perror("open");
-        return 1;
-    }
+int report(const char* instr, FILE* in) {
     int64_t charcount = 0;
     int64_t LFcount = 0;
     int64_t CRcount = 0;
@@ -174,9 +224,8 @@ int main(int argc, const char**argv) {
     while (1) {
         Result_Maybe_u32 c = get_unicodechar(in);
         if (result_is_failure(c)) {
-            fprintf(stderr, "utf-8-crlf(%s): %s\n", path, c.failure.str);
+            fprintf(stderr, "utf-8-crlf %s: %s\n", instr, c.failure.str);
             result_release(c);
-            fclose(in);
             return 1;
         }
         if (c.ok.is_nothing) {
@@ -206,11 +255,34 @@ int main(int argc, const char**argv) {
     if (last_was_CR) {
         CRcount++;
     }
-    if (fclose(in) != 0) {
-        perror("close");
-        return 1;
-    }
     printf("{ charcount: %li, LFcount: %li, CRcount: %li, CRLFcount: %li }\n",
            charcount, LFcount, CRcount, CRLFcount);
     return 0;
+}
+
+int main(int argc, const char**argv) {
+    if (argc == 1) {
+        return report("STDIN", stdin);
+    } else if (argc == 2) {
+        const char *path = argv[1];
+        FILE *in = fopen(path, "r");
+        if (!in) {
+            perror_string("open(%s)", string_quote_sh(path));
+            return 1;
+        }
+        String quotedpath = string_quote_sh(path);
+        int res = report(quotedpath.str, in);
+        if (fclose(in) != 0) {
+            perror_string("close(%s)", string_quote_sh(path));
+            return 1;
+        }
+        return res;
+    } else {
+        fprintf(stderr,
+                "Usage: %s [file]\n"
+                "  Verify proper UTF-8 encoding and report usage of CR and LF\n"
+                "  characters in <file> if given, otherwise of STDIN.\n",
+                argv[0]);
+        return 1;
+    }
 }
