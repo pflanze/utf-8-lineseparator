@@ -55,6 +55,9 @@ typedef struct {
 
 #define Nothing(T)                              \
     (Maybe_##T) { true, default_##T }
+#define Just(T)                                 \
+    (Maybe_##T) { false,
+#define EndJust  }
 
 
 typedef uint8_t u8;
@@ -77,9 +80,9 @@ Result_Maybe_u8 getc_Result(FILE *in) {
             return Error(Maybe_u8, true, strdup(msg));
 #undef EBUFSIZ
         }
-        return Ok(Maybe_u8) { true, 0 } EndOk;
+        return Ok(Maybe_u8) Nothing(u8) EndOk;
     } else {
-        return Ok(Maybe_u8) { false, c } EndOk;
+        return Ok(Maybe_u8) Just(u8) c EndJust EndOk;
     }
 }
 
@@ -95,7 +98,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
     Result_Maybe_u8 b1 = getc_Result(in);
     PROPAGATE_Result(Maybe_u32, b1);
     if (b1.ok.is_nothing) {
-        return Ok(Maybe_u32) { true, 0 } EndOk;
+        return Ok(Maybe_u32) Nothing(u32) EndOk;
     }
     codepoint = b1.ok.value;
     if ((b1.ok.value & 128) == 0) {
@@ -134,7 +137,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
         }
     }
     if (codepoint <= 0x10FFFF) {
-        return Ok(Maybe_u32) { false, codepoint } EndOk;
+        return Ok(Maybe_u32) Just(u32) codepoint EndJust EndOk;
     } else {
         char msg[EBUFSIZ];
         snprintf(msg, EBUFSIZ,
