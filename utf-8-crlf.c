@@ -109,7 +109,7 @@ finish:
     (Result_##T) { (String) { needs_freeing, str }, (T){} }
 #define Ok(T)                                           \
     (Result_##T) { (String) { false, NULL }, (T)
-#define EndOk }
+#define ENDOk }
 
 #define result_is_success(v) (!((v).failure.str))
 #define result_is_failure(v) (!!((v).failure.str))
@@ -136,7 +136,7 @@ finish:
     (Maybe_##T) { true, default_##T }
 #define Just(T)                                 \
     (Maybe_##T) { false,
-#define EndJust  }
+#define ENDJust  }
 
 
 typedef uint8_t u8;
@@ -159,9 +159,9 @@ Result_Maybe_u8 getc_Result(FILE *in) {
             return Error(Maybe_u8, true, xstrdup(msg));
 #undef EBUFSIZ
         }
-        return Ok(Maybe_u8) Nothing(u8) EndOk;
+        return Ok(Maybe_u8) Nothing(u8) ENDOk;
     } else {
-        return Ok(Maybe_u8) Just(u8) c EndJust EndOk;
+        return Ok(Maybe_u8) Just(u8) c ENDJust ENDOk;
     }
 }
 
@@ -178,7 +178,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
     Result_Maybe_u8 b1 = getc_Result(in);
     PROPAGATE_Result(Maybe_u32, b1);
     if (b1.ok.is_nothing) {
-        return Ok(Maybe_u32) Nothing(u32) EndOk;
+        return Ok(Maybe_u32) Nothing(u32) ENDOk;
     }
     codepoint = b1.ok.value;
     if ((b1.ok.value & 128) == 0) {
@@ -217,7 +217,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
         }
     }
     if (codepoint <= 0x10FFFF) {
-        return Ok(Maybe_u32) Just(u32) codepoint EndJust EndOk;
+        return Ok(Maybe_u32) Just(u32) codepoint ENDJust ENDOk;
     } else {
         char msg[EBUFSIZ];
         snprintf(msg, EBUFSIZ,
