@@ -12,6 +12,12 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define MAX2(a,b)                               \
+    ((a) < (b) ? (b) : (a))
+
+#define MAX3(a,b,c)                             \
+    ((a) < (b) ? MAX2(b, c) : MAX2(a, c))
+
 static
 void die_outofmemory() {
     fprintf(stderr, "Out of memory, aborting\n");
@@ -228,11 +234,23 @@ int report(const char* instr, FILE* in) {
     int64_t LFcount = 0;
     int64_t CRcount = 0;
     int64_t CRLFcount = 0;
+    int64_t column = 0;
     bool last_was_CR = false;
     while (1) {
         Result_Maybe_u32 c = get_unicodechar(in);
         if (result_is_failure(c)) {
-            fprintf(stderr, "utf-8-crlf %s: %s\n", instr, c.failure.str);
+            int64_t linecount = LFcount + CRcount + CRLFcount;
+            const char *questionable =
+                (linecount == MAX3(LFcount, CRcount, CRLFcount)) ? "" : "?";
+            fprintf(stderr,
+                    "utf-8-crlf %s: %s at character #%li (line %li%s, column %li%s)\n",
+                    instr,
+                    c.failure.str,
+                    charcount + 1,
+                    linecount + 1,
+                    questionable,
+                    column + 1,
+                    questionable);
             result_release(c);
             return 1;
         }
@@ -246,6 +264,7 @@ int report(const char* instr, FILE* in) {
             }
             // the new one will be counted in the next iteration
             last_was_CR = true;
+            column = 0;
         } else if (c.ok.value == '\n') {
             if (last_was_CR) {
                 CRLFcount++;
@@ -253,11 +272,13 @@ int report(const char* instr, FILE* in) {
                 LFcount++;
             }
             last_was_CR = false;
+            column = 0;
         } else {
             if (last_was_CR) {
                 CRcount++;
             }
             last_was_CR = false;
+            column++;
         }
     }
     if (last_was_CR) {
