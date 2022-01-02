@@ -44,12 +44,12 @@ int perror_str(const char *fmt, const char *arg1) {
 
 
 typedef struct {
-    bool needs_free;
+    bool needs_freeing;
     const char* str;
 } String;
 
 #define string_release(s)                       \
-    if ((s).needs_free) {                       \
+    if ((s).needs_freeing) {                    \
         free((void*)(s).str);                   \
     }
     
@@ -105,8 +105,8 @@ finish:
         T ok;                                   \
     } Result_##T;
 
-#define Error(T, needs_free, str)                               \
-    (Result_##T) { (String) { needs_free, str }, (T){} }
+#define Error(T, needs_freeing, str)                            \
+    (Result_##T) { (String) { needs_freeing, str }, (T){} }
 #define Ok(T)                                           \
     (Result_##T) { (String) { false, NULL }, (T)
 #define EndOk }
