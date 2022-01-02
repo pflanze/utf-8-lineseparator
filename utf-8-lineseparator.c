@@ -301,6 +301,7 @@ int main(int argc, const char**argv) {
         }
         String quotedpath = string_quote_sh(path);
         int res = report(quotedpath.str, in);
+        string_release(quotedpath);
         if (fclose(in) != 0) {
             perror_string("close(%s)", string_quote_sh(path));
             return 1;
