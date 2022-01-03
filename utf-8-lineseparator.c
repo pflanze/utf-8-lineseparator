@@ -9,41 +9,17 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <inttypes.h>
 #include <stdbool.h>
 #include <assert.h>
 
-bool env(const char* name) {
-    const char *val = getenv(name);
-    if (val) {
-        if (*val) {
-            return (val[0] == '1') && (val[1] == 0);
-        } else {
-            return false;
-        }
-    } else {
-        return false;
-    }
-}
+#include "result.h"
+#include "maybe.h"
+#include "shorttypenames.h" /* u8 u32 */
+#include "string.h"
+#include "util.h"
+#include "mem.h"
+#include "env.h"
 
-#define MAX2(a,b)                               \
-    ((a) < (b) ? (b) : (a))
-
-#define MAX3(a,b,c)                             \
-    ((a) < (b) ? MAX2(b, c) : MAX2(a, c))
-
-static
-void die_outofmemory() {
-    fprintf(stderr, "Out of memory, aborting\n");
-    abort();
-}
-
-static
-char *xstrdup(const char *str) {
-    char *res= strdup(str);
-    if (!res) die_outofmemory();
-    return res;
-}
 
 static
 int perror_str(const char *fmt, const char *arg1) {
@@ -56,109 +32,12 @@ int perror_str(const char *fmt, const char *arg1) {
 #undef EBUFSIZ
 }
 
-
-typedef struct {
-    bool needs_freeing;
-    const char* str;
-} String;
-
-static
-void string_release(String s) {
-    if (s.needs_freeing) {
-        free((void*)s.str);
-    }
-}
-
 static
 int perror_string(const char *fmt, String str /* taking ownership */) {
     int res = perror_str(fmt, str.str);
     string_release(str);
     return res;
 }
-
-static
-String string_quote_sh(const char *str) {
-#define QBUFSIZ 1024
-    char out[QBUFSIZ];
-    int out_i = 0;
-#define PUSH(c)                                     \
-    if (out_i < (QBUFSIZ-3-1-1)) {                  \
-        out[out_i++] = c;                           \
-    } else {                                        \
-        goto push_error;                            \
-    }
-
-    size_t len = strlen(str);
-    PUSH('\'');
-    for (int i = 0; i < len; i++) {
-        char c = str[i];
-        if (c == '\'') {
-            PUSH('\'');
-            PUSH('\\');
-            PUSH('\'');
-            PUSH('\'');
-        } else {
-            PUSH(c);
-        }
-    }
-    PUSH('\'');
-    goto finish;
-push_error:
-    out[out_i++] = '\'';
-    out[out_i++] = '.';
-    out[out_i++] = '.';
-    out[out_i++] = '.';
-finish:
-    out[out_i++] = '\0';
-    return (String) { true, xstrdup(out) };
-#undef QBUFSIZ
-}
-
-
-#define DEFTYPE_Result_(T)                      \
-    typedef struct {                            \
-        String failure;                         \
-        T ok;                                   \
-    } Result_##T;
-
-#define Error(T, needs_freeing, str)                            \
-    (Result_##T) { (String) { needs_freeing, str }, (T){} }
-#define Ok(T)                                           \
-    (Result_##T) { (String) { false, NULL }, (T)
-#define ENDOk }
-
-#define result_is_success(v) (!((v).failure.str))
-#define result_is_failure(v) (!!((v).failure.str))
-// #define result_failure_str(v) ((v).failure.str)
-#define result_release(v)                       \
-    string_release((v).failure)
-#define result_print_failure(fmt, v)            \
-    fprintf(stderr, fmt, (v).failure.str)
-
-#define PROPAGATE_Result(T, r)                          \
-    if (result_is_failure(r)) {                         \
-        return (Result_##T) { (r).failure, (T){} };     \
-    }
-
-
-
-#define DEFTYPE_Maybe_(T)                       \
-    typedef struct {                            \
-        bool is_nothing;                        \
-        T value;                                \
-    } Maybe_##T;
-
-#define Nothing(T)                              \
-    (Maybe_##T) { true, default_##T }
-#define Just(T)                                 \
-    (Maybe_##T) { false,
-#define ENDJust  }
-
-
-typedef uint8_t u8;
-#define default_u8 0
-typedef uint32_t u32;
-#define default_u32 0
 
 
 DEFTYPE_Maybe_(u8);
