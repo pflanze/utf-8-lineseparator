@@ -304,6 +304,9 @@ int report(const char* instr, FILE* in) {
 
 
 #if FUZZ
+// See
+// https://github.com/AFLplusplus/AFLplusplus/blob/stable/utils/persistent_mode/persistent_demo_new.c
+__AFL_FUZZ_INIT();
 # pragma clang optimize off
 // # pragma GCC   optimize("O0")
 #endif
@@ -312,13 +315,15 @@ int main(int argc, const char**argv) {
 #if FUZZ
     if (env("FUZZ")) {
         // Execution for AFL fuzz testing
+        ssize_t len;
+        unsigned char *buf;
         __AFL_INIT();
+        buf = __AFL_FUZZ_TESTCASE_BUF;
         while (__AFL_LOOP(1000)) {
-            FILE *in = fdopen(0, "r");
-            assert(in);
+            len = __AFL_FUZZ_TESTCASE_LEN;
+
             int res = report("STDIN", in);
             fprintf(stderr, "report returned with exit code %i\n", res);
-            fclose(in);
         }
         return 0;
     } else {
