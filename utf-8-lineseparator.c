@@ -11,6 +11,20 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <assert.h>
+
+bool env(const char* name) {
+    const char *val = getenv(name);
+    if (val) {
+        if (*val) {
+            return (val[0] == '1') && (val[1] == 0);
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
 
 #define MAX2(a,b)                               \
     ((a) < (b) ? (b) : (a))
@@ -288,30 +302,54 @@ int report(const char* instr, FILE* in) {
     return 0;
 }
 
+
+#if FUZZ
+# pragma clang optimize off
+// # pragma GCC   optimize("O0")
+#endif
+
 int main(int argc, const char**argv) {
-    if (argc == 1) {
-        return report("STDIN", stdin);
-    } else if (argc == 2) {
-        const char *path = argv[1];
-        FILE *in = fopen(path, "r");
-        if (!in) {
-            perror_string("open(%s)", string_quote_sh(path));
-            return 1;
+#if FUZZ
+    if (env("FUZZ")) {
+        // Execution for AFL fuzz testing
+        __AFL_INIT();
+        while (__AFL_LOOP(1000)) {
+            FILE *in = fdopen(0, "r");
+            assert(in);
+            int res = report("STDIN", in);
+            fprintf(stderr, "report returned with exit code %i\n", res);
+            fclose(in);
         }
-        String quotedpath = string_quote_sh(path);
-        int res = report(quotedpath.str, in);
-        string_release(quotedpath);
-        if (fclose(in) != 0) {
-            perror_string("close(%s)", string_quote_sh(path));
-            return 1;
-        }
-        return res;
+        return 0;
     } else {
-        fprintf(stderr,
-                "Usage: %s [file]\n"
-                "  Verify proper UTF-8 encoding and report usage of CR and LF\n"
-                "  characters in <file> if given, otherwise of STDIN.\n",
-                argv[0]);
-        return 1;
+#endif
+        // Normal execution
+        if (argc == 1) {
+            return report("STDIN", stdin);
+        } else if (argc == 2) {
+            const char *path = argv[1];
+            FILE *in = fopen(path, "r");
+            if (!in) {
+                perror_string("open(%s)", string_quote_sh(path));
+                return 1;
+            }
+            String quotedpath = string_quote_sh(path);
+            int res = report(quotedpath.str, in);
+            string_release(quotedpath);
+            if (fclose(in) != 0) {
+                perror_string("close(%s)", string_quote_sh(path));
+                return 1;
+            }
+            return res;
+        } else {
+            fprintf(stderr,
+                    "Usage: %s [file]\n"
+                    "  Verify proper UTF-8 encoding and report usage of CR and LF\n"
+                    "  characters in <file> if given, otherwise of STDIN.\n",
+                    argv[0]);
+            return 1;
+        }
+#if FUZZ
     }
+#endif
 }
