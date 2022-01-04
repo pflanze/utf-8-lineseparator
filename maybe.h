@@ -21,5 +21,7 @@
     (Maybe_##T) { false,
 #define ENDJust  }
 
+#define maybe_is_just(v) (!(v).is_nothing)
+
 
 #endif /* MAYBE_H_ */
