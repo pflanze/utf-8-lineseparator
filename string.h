@@ -15,6 +15,8 @@ typedef struct {
     const char* str;
 } String;
 
+#define noString (String) { false, NULL }
+
 static
 void string_release(String s) {
     if (s.needs_freeing) {
