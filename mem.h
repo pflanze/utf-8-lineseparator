@@ -16,6 +16,14 @@ void die_outofmemory() {
     abort();
 }
 
+static inline
+void *xmalloc(size_t size) {
+    void *p = malloc(size);
+    if (!p) die_outofmemory();
+    return p;
+}
+
+
 static
 char *xstrdup(const char *str) {
     char *res= strdup(str);
