@@ -284,7 +284,7 @@ int report(const char* instr, FILE* in) {
     if (last_was_CR) {
         CRcount++;
     }
-    printf("{ charcount: %li, LFcount: %li, CRcount: %li, CRLFcount: %li }\n",
+    printf("{ \"charcount\": %li, \"LFcount\": %li, \"CRcount\": %li, \"CRLFcount\": %li }\n",
            charcount, LFcount, CRcount, CRLFcount);
     return 0;
 }
