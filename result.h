@@ -17,7 +17,9 @@
 
 #define Error(T, needs_freeing, str)                            \
     (Result_##T) { (String) { needs_freeing, str }, (T){} }
-#define Ok(T)                                           \
+#define string_Error(T, string)                                 \
+    (Result_##T) { string, (T){} }
+#define Ok(T)                                                   \
     (Result_##T) { (String) { false, NULL }, (T)
 #define ENDOk }
 
