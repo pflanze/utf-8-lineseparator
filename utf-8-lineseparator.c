@@ -48,11 +48,13 @@ typedef struct {
     const char* str;
 } String;
 
-#define string_release(s)                       \
-    if ((s).needs_freeing) {                    \
-        free((void*)(s).str);                   \
+static
+void string_release(String s) {
+    if (s.needs_freeing) {
+        free((void*)s.str);
     }
-    
+}
+
 static
 int perror_string(const char *fmt, String str /* taking ownership */) {
     int res = perror_str(fmt, str.str);
