@@ -243,18 +243,15 @@ int report(const char* instr, FILE* in) {
         if (result_is_failure(c)) {
             int64_t linecount = LFcount + CRcount + CRLFcount;
             const char *questionable =
-                (linecount == MAX3(LFcount, CRcount, CRLFcount)) ? "" : "?";
-            fprintf(stderr,
-                    "utf-8-lineseparator %s: %s at character #%li (line %li%s, column %li%s)\n",
-                    instr,
-                    c.failure.str,
-                    charcount + 1,
-                    linecount + 1,
-                    questionable,
-                    column + 1,
-                    questionable);
+                (linecount == MAX3(LFcount, CRcount, CRLFcount)) ? "false" : "true";
+            printf("{ \"failure\": \"%s\", \"character_position\": %li, \"line\": %li, \"column\": %li, \"line_questionable\": %s }\n",
+                   c.failure.str, // XXX Needs to be converted to json string
+                   charcount + 1,
+                   linecount + 1,
+                   column + 1,
+                   questionable);
             result_release(c);
-            return 1;
+            return 0;
         }
         if (c.ok.is_nothing) {
             break;
