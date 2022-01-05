@@ -244,7 +244,7 @@ int report(const char* instr, FILE* in) {
             int64_t linecount = LFcount + CRcount + CRLFcount;
             const char *questionable =
                 (linecount == MAX3(LFcount, CRcount, CRLFcount)) ? "false" : "true";
-            printf("{ \"failure\": \"%s\", \"character_position\": %li, \"line\": %li, \"column\": %li, \"line_questionable\": %s }\n",
+            printf("{ \"type\": \"utf-8-failure\", \"failure\": \"%s\", \"character_position\": %li, \"line\": %li, \"column\": %li, \"line_questionable\": %s }\n",
                    c.failure.str, // XXX Needs to be converted to json string
                    charcount + 1,
                    linecount + 1,
@@ -283,7 +283,7 @@ int report(const char* instr, FILE* in) {
     if (last_was_CR) {
         CRcount++;
     }
-    printf("{ \"charcount\": %li, \"LFcount\": %li, \"CRcount\": %li, \"CRLFcount\": %li }\n",
+    printf("{ \"type\": \"linecount\", \"charcount\": %li, \"LFcount\": %li, \"CRcount\": %li, \"CRLFcount\": %li }\n",
            charcount, LFcount, CRcount, CRLFcount);
     return 0;
 }
