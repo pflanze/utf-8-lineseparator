@@ -16,10 +16,12 @@ san: utf-8-lineseparator.san
 utf-8-lineseparator.fuzz: utf-8-lineseparator.c $(headers)
 	afl-clang-fast $(CFLAGS) $(SAN) -DFUZZ=1 -o utf-8-lineseparator.fuzz utf-8-lineseparator.c
 
+fuzz: utf-8-lineseparator.fuzz
+
 all: utf-8-lineseparator utf-8-lineseparator.san utf-8-lineseparator.fuzz
 
 
-fuzz: utf-8-lineseparator.fuzz
+runfuzz: fuzz
 	bin/run-afl
 
 
