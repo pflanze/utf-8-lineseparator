@@ -144,7 +144,7 @@ int report(BufferedStream* in /* borrowed */) {
 }
 
 
-#if FUZZ
+#if AFL
 // See
 // https://github.com/AFLplusplus/AFLplusplus/blob/stable/utils/persistent_mode/persistent_demo_new.c
 __AFL_FUZZ_INIT();
@@ -153,8 +153,8 @@ __AFL_FUZZ_INIT();
 #endif
 
 int main(int argc, const char**argv) {
-#if FUZZ
-    if (env("FUZZ")) {
+#if AFL
+    if (env("AFL")) {
         // Execution for AFL fuzz testing
         __AFL_INIT();
         unsigned char *buf = __AFL_FUZZ_TESTCASE_BUF;
@@ -227,7 +227,7 @@ int main(int argc, const char**argv) {
                     argv[0]);
             return 1;
         }
-#if FUZZ
+#if AFL
     }
 #endif
 }

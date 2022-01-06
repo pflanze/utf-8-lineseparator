@@ -4,10 +4,10 @@ set -euo pipefail
 IFS=
 
 export AFL_TMPDIR
-export FUZZ=1
+export AFL=1
 
 set -x
 
 AFL_TMPDIR=$(mktemp -d -p /dev/shm/)
 
-exec afl-fuzz -i afl -o aflfind -m 100000000 -- ./utf-8-lineseparator.fuzz
+exec afl-fuzz -i afl -o aflfind -m 100000000 -- ./utf-8-lineseparator.afl
