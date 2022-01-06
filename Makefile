@@ -1,5 +1,6 @@
-SAN=-fsanitize=undefined -fsanitize=address -fPIE -fno-omit-frame-pointer
-CFLAGS=-Wall -gdwarf-4 -g3 -O2 -std=c11 -fdiagnostics-color=always
+OPT ?= -O2
+SAN ?= -fsanitize=undefined -fsanitize=address -fPIE -fno-omit-frame-pointer
+CFLAGS ?= -Wall -gdwarf-4 -g3 $(OPT) -std=c11 -fdiagnostics-color=always
 compile=$(CC) -DFUZZ=0 $(CFLAGS)
 
 headers=buffer.h env.h io.h maybe.h mem.h result.h shorttypenames.h string.h util.h
