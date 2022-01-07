@@ -159,7 +159,7 @@ int main(int argc, const char**argv) {
         // Execution for AFL fuzz testing
         __AFL_INIT();
         unsigned char *buf = __AFL_FUZZ_TESTCASE_BUF;
-        while (__AFL_LOOP(1000)) {
+        while (__AFL_LOOP(1000000)) {
             ssize_t len = __AFL_FUZZ_TESTCASE_LEN;
 
             BufferedStream in = buffer_to_BufferedStream(
