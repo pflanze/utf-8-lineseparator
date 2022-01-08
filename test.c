@@ -58,25 +58,29 @@ static
 void t_utf8_equal_codepoint(u32 codepoint,
                             const unsigned char *buf,
                             size_t buflen,
-                            int line,
+                            const char *sourcefile,
+                            int sourceline,
                             int *successes,
                             int *failures,
                             int *errors) {
     Result_u32 rc =
         buf_to_utf8_codepoint(buf, buflen);
     if (result_is_failure(rc)) {
-        WARN_("*** Error running test on line %i: %s",
-              line,
-              rc.failure.str);
+        WARN_("*** Error running test: %s at %s:%i",
+              rc.failure.str,
+              sourcefile,
+              sourceline);
         (*errors)++;
     } else {
         if (rc.ok == codepoint) {
             (*successes)++;
         } else {
-            WARN_("*** Test failed on line %i: expected %u, got %u",
-                  line,
+            WARN_("*** Test failed: expected %u, got %u (0x%x) at %s:%i",
                   codepoint,
-                  rc.ok);
+                  rc.ok,
+                  rc.ok,
+                  sourcefile,
+                  sourceline);
             (*failures)++;
         }
     }
@@ -87,7 +91,8 @@ void t_utf8_equal_codepoint(u32 codepoint,
 #define T_UTF8_EQUAL_CODEPOINT(codepoint, ...)                          \
     {                                                                   \
         const unsigned char buf[] = { __VA_ARGS__ };                    \
-        t_utf8_equal_codepoint(codepoint, buf, sizeof(buf), __LINE__,   \
+        t_utf8_equal_codepoint(codepoint, buf, sizeof(buf),             \
+                               __FILE__, __LINE__,                      \
                                &successes, &failures, &errors);         \
     }
 
@@ -103,7 +108,12 @@ int main() {
     T_UTF8_EQUAL_CODEPOINT(123, 43);
     */
 
+    T_UTF8_EQUAL_CODEPOINT(13, 0x0d);
     T_UTF8_EQUAL_CODEPOINT(228, 0xc3, 0xa4);
+    T_UTF8_EQUAL_CODEPOINT(231, 0xc3, 0xa7);
+    T_UTF8_EQUAL_CODEPOINT(0x20AC, 0xE2, 0x82, 0xAC);
+    T_UTF8_EQUAL_CODEPOINT(0xD55C, 0xED, 0x95, 0x9C);
+    T_UTF8_EQUAL_CODEPOINT(0x10348, 0xF0, 0x90, 0x8D, 0x88);
     T_UTF8_EQUAL_CODEPOINT(0x10FFF0, 0xf4, 0x8f, 0xbf, 0xb0);
 
     printf("test results: %i success(es), %i failure(s), %i error(s)\n",
