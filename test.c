@@ -15,9 +15,11 @@
 
 DEFTYPE_Result_(u32);
 
+
 static
 Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
                                  size_t inlen) {
+    BEGINRETURN(Result_u32);
     BufferedStream in = buffer_to_BufferedStream(
         (Buffer) {
             .length = inlen,
@@ -32,22 +34,24 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
             "buf"
         });
     Result_Maybe_u32 rmc = get_unicodechar(&in);
-    PROPAGATE_Result(u32, rmc);
+    PROPAGATEL_Result(_rmc, u32, rmc);
     if (rmc.ok.is_nothing) {
-        result_release(rmc);
-        return Error(u32, false, "premature EOF");
+        RETURNL(_rmc, Error(u32, false, "premature EOF"));
     }
     Result_Maybe_u32 rmc2 = get_unicodechar(&in);
-    PROPAGATE_Result(u32, rmc2);
+    PROPAGATEL_Result(_rmc2, u32, rmc2);
     if (! rmc2.ok.is_nothing) {
-        result_release(rmc2);
-        result_release(rmc);
-        return Error(u32, false, "left-over data after character");
+        RETURNL(_rmc2, Error(u32, false, "left-over data after character"));
     }
 
-    u32 res = rmc.ok.value;
-//    bufferedstream_release(&in);
-    return Ok(u32) res ENDOk;
+    RETURN(Ok(u32) rmc.ok.value ENDOk);
+_rmc2:
+    result_release(rmc2);
+_rmc:
+    result_release(rmc);
+    bufferedstream_close(&in);
+    bufferedstream_release(&in);
+    ENDRETURN;
 }
 
 static
