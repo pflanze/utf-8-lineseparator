@@ -170,7 +170,8 @@ int main(int argc, const char**argv) {
 
             int res = report(&in);
             fprintf(stderr, "report returned with exit code %i\n", res);
-            // bufferedstream_release(&in);
+            bufferedstream_release(&in);
+
             leakcheck_verify();
         }
         return 0;
