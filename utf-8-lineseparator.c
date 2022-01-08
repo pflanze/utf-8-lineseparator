@@ -18,27 +18,9 @@
 #include "util.h"
 #include "mem.h"
 #include "env.h"
+#include "buffer.h"
 
 
-DEFTYPE_Maybe_(u8);
-DEFTYPE_Result_(Maybe_u8);
-
-static
-Result_Maybe_u8 getc_Result(FILE *in) {
-    int c = getc(in);
-    if (c == EOF) {
-        if (errno) {
-#define EBUFSIZ 256
-            char msg[EBUFSIZ];
-            strerror_r(errno, msg, EBUFSIZ);
-            return Error(Maybe_u8, true, xstrdup(msg));
-#undef EBUFSIZ
-        }
-        return Ok(Maybe_u8) Nothing(u8) ENDOk;
-    } else {
-        return Ok(Maybe_u8) Just(u8) c ENDJust ENDOk;
-    }
-}
 
 DEFTYPE_Maybe_(u32);
 DEFTYPE_Result_(Maybe_u32);
@@ -46,11 +28,11 @@ DEFTYPE_Result_(Maybe_u32);
 // XXX TODO: handle Byte order mark?
 
 static
-Result_Maybe_u32 get_unicodechar(FILE *in) {
+Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
     // https://en.wikipedia.org/wiki/Utf-8#Encoding
 #define EBUFSIZ 256
     u32 codepoint;
-    Result_Maybe_u8 b1 = getc_Result(in);
+    Result_Maybe_u8 b1 = bufferedstream_getc(in);
     PROPAGATE_Result(Maybe_u32, b1);
     if (b1.ok.is_nothing) {
         return Ok(Maybe_u32) Nothing(u32) ENDOk;
@@ -72,7 +54,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
                 "invalid start byte decoding UTF-8");
         }
         for (int i = 1; i < numbytes; i++) {
-            Result_Maybe_u8 b = getc_Result(in);
+            Result_Maybe_u8 b = bufferedstream_getc(in);
             PROPAGATE_Result(Maybe_u32, b);
             if (b.ok.is_nothing) {
                 char msg[EBUFSIZ];
@@ -104,7 +86,7 @@ Result_Maybe_u32 get_unicodechar(FILE *in) {
 }
 
 static
-int report(const char* instr, FILE* in) {
+int report(BufferedStream* in /* borrowed */) {
     int64_t charcount = 0;
     int64_t LFcount = 0;
     int64_t CRcount = 0;
@@ -174,36 +156,68 @@ int main(int argc, const char**argv) {
 #if FUZZ
     if (env("FUZZ")) {
         // Execution for AFL fuzz testing
-        ssize_t len;
-        unsigned char *buf;
         __AFL_INIT();
-        buf = __AFL_FUZZ_TESTCASE_BUF;
+        unsigned char *buf = __AFL_FUZZ_TESTCASE_BUF;
         while (__AFL_LOOP(1000)) {
-            len = __AFL_FUZZ_TESTCASE_LEN;
+            ssize_t len = __AFL_FUZZ_TESTCASE_LEN;
 
-            int res = report("STDIN", in);
+            BufferedStream in = buffer_to_BufferedStream(
+                (Buffer) { .length = len, .readpos = 0, .size = len,
+                    .array = buf, .needs_freeing = false },
+                (String) { false, "AFL buffer" });
+
+            int res = report(&in);
             fprintf(stderr, "report returned with exit code %i\n", res);
+            bufferedstream_release(&in);
         }
         return 0;
     } else {
 #endif
         // Normal execution
         if (argc == 1) {
-            return report("STDIN", stdin);
+            BufferedStream in =
+                fd_BufferedStream(0,
+                                  STREAM_DIRECTION_IN,
+                                  (String) { false, "STDIN" },
+                                  false);
+            int res = report(&in);
+            Result_Unit r = bufferedstream_close(&in);
+            if (result_is_failure(r)) {
+                // XX should this have the path in the message,
+                // already? Should there be a
+                // bufferedstream_error_message method?
+                fprintf(stderr, "close: %s", r.failure.str);
+                res = 1; // OK?
+            }
+            result_release(r);
+            bufferedstream_release(&in);
+
+            return res;
         } else if (argc == 2) {
             const char *path = argv[1];
-            FILE *in = fopen(path, "r");
-            if (!in) {
-                perror_string("open(%s)", string_quote_sh(path));
+            Result_BufferedStream r_in =
+                open_BufferedStream((String) { false, path },
+                                    O_RDONLY);
+            if (result_is_failure(r_in)) {
+                // XX should this have the path in the message,
+                // already? Should there be a
+                // bufferedstream_error_message method?
+                fprintf(stderr, "open: %s", r_in.failure.str);
+                result_release(r_in);
                 return 1;
             }
-            String quotedpath = string_quote_sh(path);
-            int res = report(quotedpath.str, in);
-            string_release(quotedpath);
-            if (fclose(in) != 0) {
-                perror_string("close(%s)", string_quote_sh(path));
-                return 1;
+
+            int res = report(&r_in.ok);
+            Result_Unit r = bufferedstream_close(&r_in.ok);
+            if (result_is_failure(r)) {
+                fprintf(stderr, "close: %s", r.failure.str);
+                res = 1; // OK?
             }
+            result_release(r);
+            bufferedstream_release(&r_in.ok);
+            result_release(r_in);
+            // (XX should result_release magically call release on .ok, too?)
+
             return res;
         } else {
             fprintf(stderr,
