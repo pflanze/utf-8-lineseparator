@@ -172,7 +172,7 @@ int main(int argc, const char**argv) {
             fprintf(stderr, "report returned with exit code %i\n", res);
             bufferedstream_release(&in);
 
-            leakcheck_verify();
+            leakcheck_verify(true);
         }
         return 0;
     } else {
@@ -196,7 +196,7 @@ int main(int argc, const char**argv) {
             result_release(r);
             bufferedstream_release(&in);
 
-            leakcheck_verify();
+            leakcheck_verify(false);
             return res;
         } else if (argc == 2) {
             const char *path = argv[1];
@@ -209,7 +209,7 @@ int main(int argc, const char**argv) {
                 // bufferedstream_error_message method?
                 fprintf(stderr, "open: %s", r_in.failure.str);
                 result_release(r_in);
-                leakcheck_verify();
+                leakcheck_verify(false);
                 return 1;
             }
 
@@ -224,7 +224,7 @@ int main(int argc, const char**argv) {
             result_release(r_in);
             // (XX should result_release magically call release on .ok, too?)
 
-            leakcheck_verify();
+            leakcheck_verify(false);
             return res;
         } else {
             fprintf(stderr,
@@ -232,7 +232,7 @@ int main(int argc, const char**argv) {
                     "  Verify proper UTF-8 encoding and report usage of CR and LF\n"
                     "  characters in <file> if given, otherwise of STDIN.\n",
                     argv[0]);
-            leakcheck_verify();
+            leakcheck_verify(false);
             return 1;
         }
 #if AFL

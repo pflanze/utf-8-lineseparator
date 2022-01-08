@@ -19,6 +19,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 
 // Should be in a leakcheck.c but we're currently using a single
@@ -26,12 +27,12 @@
 int32_t leakcheck_active_allocs = 0;
 
 static
-void leakcheck_verify() {
+void leakcheck_verify(bool abort_on_failure) {
     if (leakcheck_active_allocs != 0) {
         fprintf(stderr,
                 "*** leakcheck failure: leakcheck_active_allocs = %i\n",
                 leakcheck_active_allocs);
-        abort();
+        if (abort_on_failure) abort();
     }
 }
 
