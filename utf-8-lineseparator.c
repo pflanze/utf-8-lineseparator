@@ -20,7 +20,7 @@
 #include "util.h"
 #include "mem.h"
 #include "env.h"
-#include "buffer.h"
+#include "bufferedstream.h"
 
 
 DEFTYPE_Maybe_(u32);
