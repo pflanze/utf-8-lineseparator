@@ -89,7 +89,7 @@ BufferedStream buffer_to_BufferedStream(Buffer s /* owned */,
     };
 }
 
-static
+UNUSED static
 BufferedStream fd_BufferedStream(int fd,
                                  int direction,
                                  String maybe_path_or_name /* owned */,
@@ -116,7 +116,7 @@ BufferedStream fd_BufferedStream(int fd,
 
 DEFTYPE_Result_(BufferedStream);
 
-static
+UNUSED static
 Result_BufferedStream open_BufferedStream(String path /* owned */,
                                           int flags) {
     assert(flags == O_RDONLY); // for now
