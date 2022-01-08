@@ -14,6 +14,7 @@
 
 
 DEFTYPE_Maybe_(u8);
+#define default_Maybe_u8 {}
 
 typedef struct {
     size_t length;

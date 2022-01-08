@@ -18,5 +18,8 @@ typedef uint8_t u8;
 typedef uint32_t u32;
 #define default_u32 0
 
+/* And default values for other types */
+#define default_bool false
+
 
 #endif /* SHORTTYPENAMES_H_ */

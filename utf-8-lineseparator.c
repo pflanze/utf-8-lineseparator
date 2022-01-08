@@ -24,7 +24,9 @@
 
 
 DEFTYPE_Maybe_(u32);
+#define default_Maybe_u32
 DEFTYPE_Result_(Maybe_u32);
+
 
 // XXX TODO: handle Byte order mark?
 

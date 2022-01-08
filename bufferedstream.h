@@ -59,6 +59,8 @@ typedef struct {
     };
 } BufferedStream;
 
+#define default_BufferedStream (BufferedStream){}
+
 #define STREAM_DIRECTION_IN 1
 /* #define STREAM_DIRECTION_OUT 2 */
 /* #define STREAM_DIRECTION_INOUT 3 */
