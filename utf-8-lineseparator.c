@@ -107,7 +107,7 @@ int report(BufferedStream* in /* borrowed */) {
                    linecount + 1,
                    column + 1,
                    questionable);
-            result_release(c);
+            /* result_release(c); */
             return 0;
         }
         if (c.ok.is_nothing) {
