@@ -31,17 +31,20 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
     if (b1.ok.is_nothing) {
         return Ok(Maybe_u32) Nothing(u32) ENDOk;
     }
-    codepoint = b1.ok.value;
     if ((b1.ok.value & 128) == 0) {
         // 1 byte
+        codepoint = b1.ok.value;
     } else {
         int numbytes;
         if        ((b1.ok.value & 0b11100000) == 0b11000000) {
             numbytes = 2;
+            codepoint = b1.ok.value & 0b11111;
         } else if ((b1.ok.value & 0b11110000) == 0b11100000) {
             numbytes = 3;
+            codepoint = b1.ok.value & 0b1111;
         } else if ((b1.ok.value & 0b11111000) == 0b11110000) {
             numbytes = 4;
+            codepoint = b1.ok.value & 0b111;
         } else {
             return Error(
                 Maybe_u32, false,
@@ -64,7 +67,8 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
                          i+1);
                 return Error(Maybe_u32, true, xstrdup(msg));
             }
-            codepoint |= ((b.ok.value & 0b00111111) << (i * 6 + 1));
+            codepoint <<= 6;
+            codepoint |= (b.ok.value & 0b00111111);
         }
     }
     if (codepoint <= 0x10FFFF) {
