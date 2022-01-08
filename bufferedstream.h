@@ -148,6 +148,7 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
 
 static
 void bufferedstream_release(BufferedStream *s) {
+    assert(s->is_closed);
     buffer_release(&s->buffer);
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
         // nothing
