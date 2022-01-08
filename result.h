@@ -31,9 +31,11 @@
 #define result_print_failure(fmt, v)            \
     fprintf(stderr, fmt, (v).failure.str)
 
-#define PROPAGATE_Result(T, r)                                  \
-    if (result_is_failure(r)) {                                 \
-        return (Result_##T) { (r).failure, default_##T };       \
+#define PROPAGATE_Result(T, r)                                          \
+    if (result_is_failure(r)) {                                         \
+        /* (r).failure.needs_freeing = false;                           \
+           after the next line, but usually deallocated anyway */       \
+        return (Result_##T) { (r).failure, default_##T };               \
     }
 
 /*
@@ -67,7 +69,9 @@
 
 #define PROPAGATEL_Result(label, T, r)                                  \
     if (result_is_failure(r)) {                                         \
-        RETURNL(label, ((Result_##T) { (r).failure, default_##T }));    \
+        __return = (Result_##T) { (r).failure, default_##T };           \
+        (r).failure.needs_freeing = false;                              \
+        goto label;                                                     \
     }
 
 
