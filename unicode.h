@@ -73,7 +73,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
     } else {
         char msg[EBUFSIZ];
         snprintf(msg, EBUFSIZ,
-                 "invalid unicode codepoint (%ui)",
+                 "invalid unicode codepoint (%u)",
                  codepoint);
         return Error(Maybe_u32, true, xstrdup(msg));
     }
