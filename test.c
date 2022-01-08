@@ -46,8 +46,7 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
     }
 
     u32 res = rmc.ok.value;
-    bufferedstream_close(&in);
-    bufferedstream_release(&in);
+//    bufferedstream_release(&in);
     return Ok(u32) res ENDOk;
 }
 
