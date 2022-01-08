@@ -3,3 +3,4 @@ utf-8-lineseparator.san
 utf-8-lineseparator.afl
 .gdb_history
 /afl*
+/test*
