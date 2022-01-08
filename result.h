@@ -36,5 +36,39 @@
         return (Result_##T) { (r).failure, default_##T };       \
     }
 
+/*
+
+  Label based cleanup handling:
+
+    Result_Sometype foo() {
+        BEGINRETURN(Result_Sometype);
+        ...
+        if (bar) RETURNL(l1, val1);
+        Result_foo x = givingx();
+        PROPAGATEL_Result(l2, Sometype, x);
+        RETURN(val2);
+     l2:
+        result_release(x);
+     l1:
+        cleanup1();
+        ENDRETURN;
+    }
+  
+*/
+#define BEGINRETURN(T)                          \
+    T __return;
+#define RETURNL(label, val)                      \
+    __return = val;                              \
+    goto label;
+#define RETURN(val)                             \
+    __return = val;
+#define ENDRETURN                               \
+    return __return;
+
+#define PROPAGATEL_Result(label, T, r)                                  \
+    if (result_is_failure(r)) {                                         \
+        RETURNL(label, ((Result_##T) { (r).failure, default_##T }));    \
+    }
+
 
 #endif /* RESULT_H_ */
