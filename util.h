@@ -31,4 +31,8 @@
     do { fprintf(stderr, "%s\n", msg); ABORT(); } while(0)
 
 
+#define FOR_RANGE(var, from, to)                \
+    for (int var = from; var < to; var++)
+
+
 #endif /* UTIL_H_ */

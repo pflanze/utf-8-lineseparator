@@ -97,9 +97,6 @@ void t_utf8_equal_codepoint(u32 codepoint,
                                &successes, &failures, &errors);         \
     }
 
-#define FOR_RANGE(var, from, to)                \
-    for (int var = from; var < to; var++)
-
 
 int main() {
     int successes = 0;
