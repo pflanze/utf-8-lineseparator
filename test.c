@@ -11,6 +11,7 @@
 #include "bufferedstream.h"
 #include "buffer.h"
 #include "result.h"
+#include "env.h"
 
 
 DEFTYPE_Result_(u32);
@@ -96,6 +97,9 @@ void t_utf8_equal_codepoint(u32 codepoint,
                                &successes, &failures, &errors);         \
     }
 
+#define FOR_RANGE(var, from, to)                \
+    for (int var = from; var < to; var++)
+
 
 int main() {
     int successes = 0;
@@ -114,7 +118,26 @@ int main() {
     T_UTF8_EQUAL_CODEPOINT(0x20AC, 0xE2, 0x82, 0xAC);
     T_UTF8_EQUAL_CODEPOINT(0xD55C, 0xED, 0x95, 0x9C);
     T_UTF8_EQUAL_CODEPOINT(0x10348, 0xF0, 0x90, 0x8D, 0x88);
-    T_UTF8_EQUAL_CODEPOINT(0x10FFF0, 0xf4, 0x8f, 0xbf, 0xb0);
+    if (! env("EXHAUSTIVE")) {
+        T_UTF8_EQUAL_CODEPOINT(0x10FFF0, 0xf4, 0x8f, 0xbf, 0xb0);
+    } else {
+        // Just trying to crash it.
+        // Missing 5th and 6th bytes (too costly).
+        FOR_RANGE (i3, 0, 256) {
+            WARN_("i3 = %i", i3);
+            FOR_RANGE (i2, 0, 256) {
+                FOR_RANGE (i1, 0, 256) {
+                    FOR_RANGE (i0, 0, 256) {
+                        const unsigned char buf[] = { i0, i1, i2, i3 };
+                        Result_u32 rc = buf_to_utf8_codepoint(
+                            buf, sizeof(buf));
+                        // if (result_is_success(rc)) ...
+                        result_release(rc);
+                    }
+                }
+            }
+        }
+    }
 
     printf("test results: %i success(es), %i failure(s), %i error(s)\n",
            successes, failures, errors);
