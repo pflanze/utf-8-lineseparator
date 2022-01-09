@@ -2,6 +2,10 @@ utf-8-lineseparator
 utf-8-lineseparator.san
 utf-8-lineseparator.afl
 utf-8-lineseparator.aflsan
+utf-8-lineseparator.cov
+utf-8-lineseparator.aflcov
 .gdb_history
 /afl*
 /test*
+*.gcno
+*.gcda
