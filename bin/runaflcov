@@ -4,7 +4,7 @@
 # https://clang.llvm.org/docs/SourceBasedCodeCoverage.html
 
 set -euo pipefail
-IFS=
+#IFS=
 
 _which() {
     which "$1" > /dev/null 2>&1
@@ -55,7 +55,13 @@ rm -rf "$profile_file_base"
 "$llvm_profdata" merge -sparse "$profile_file_base"/* -o "$BIN".profdata
 
 # line-oriented coverage report
-"$llvm_cov" show "$BIN" -instr-profile="$BIN".profdata --show-expansions -use-color | $PAGER
+if [ "${SHOW_EXPANSIONS-0}" = 1 ]; then
+    llvm_cov_flags=--show-expansions
+else
+    llvm_cov_flags=
+fi
+
+"$llvm_cov" show "$BIN" -instr-profile="$BIN".profdata $llvm_cov_flags -use-color | $PAGER
 
 # TODO:
 
