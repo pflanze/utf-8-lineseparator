@@ -29,7 +29,7 @@ PAGER=${PAGER-less}
 
 profile_file_base=$BIN.profraw
 
-rm -f "$profile_file_base".*
+rm -rf "$profile_file_base"
 
 (
     i=0
@@ -41,7 +41,7 @@ rm -f "$profile_file_base".*
     for f in aflfind/queue/* ; do
         if [ -e "$f" ]; then
             echo "== $f ==";
-            export LLVM_PROFILE_FILE=$profile_file_base.$i
+            export LLVM_PROFILE_FILE=$profile_file_base/$i
             i=$(( i + 1 ))
             set +e
             "$BIN" "$f"
@@ -52,7 +52,7 @@ rm -f "$profile_file_base".*
     done
 ) 2>&1|less
 
-"$llvm_profdata" merge -sparse "$profile_file_base".* -o "$BIN".profdata
+"$llvm_profdata" merge -sparse "$profile_file_base"/* -o "$BIN".profdata
 
 # line-oriented coverage report
 "$llvm_cov" show "$BIN" -instr-profile="$BIN".profdata -use-color | $PAGER
