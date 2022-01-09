@@ -19,6 +19,8 @@ DEFTYPE_Maybe_(u32);
 DEFTYPE_Result_(Maybe_u32);
 
 
+DEF_LADDER_FOR(codepoint);
+
 // XXX TODO: handle Byte order mark?
 
 static
@@ -72,6 +74,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
         }
     }
     if (codepoint <= 0x10FFFF) {
+        LADDER_UP_TO(codepoint, 0, 0x10FFFF);
         ASSERT(codepoint < 0x10FFFF);
         return Ok(Maybe_u32) Just(u32) codepoint ENDJust ENDOk;
     } else {

@@ -48,5 +48,31 @@
         abort();                                \
     }
 
+// A hack to lead AFL towards a particular number:
+#define DEF_LADDER_FOR(var)                     \
+    int ladder_##var##_4;                       \
+    int ladder_##var##_8;                       \
+    int ladder_##var##_12;                      \
+    int ladder_##var##_16;
+    
+#define LADDER_UP_TO(var, from, to)                       \
+    {                                                     \
+        __typeof__ (from) _from = (from);                 \
+        __typeof__ (to) _to = (to);                       \
+        __typeof__ (to) _diff = _to - _from;              \
+        if (var > (_to - (_diff >> 4))) {                 \
+            ladder_##var##_4++;                           \
+            if (var > (_to - (_diff >> 8))) {             \
+                ladder_##var##_8++;                       \
+                if (var > (_to - (_diff >> 12))) {        \
+                    ladder_##var##_12++;                  \
+                    if (var > (_to - (_diff >> 16))) {    \
+                        ladder_##var##_16++;              \
+                    }                                     \
+                }                                         \
+            }                                             \
+        }                                                 \
+    }
+
 
 #endif /* UTIL_H_ */
