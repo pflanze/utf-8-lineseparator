@@ -31,8 +31,9 @@
     do { fprintf(stderr, "%s\n", msg); ABORT(); } while(0)
 
 
-#define FOR_RANGE(var, from, to)                \
-    for (int var = from; var < to; var++)
+#define FOR_RANGE(var, from, to)                        \
+    __typeof__ (to) __for_range_to = (to);              \
+    for (int var = (from); var < __for_range_to; var++)
 
 
 #endif /* UTIL_H_ */
