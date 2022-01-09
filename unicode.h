@@ -19,9 +19,6 @@ DEFTYPE_Maybe_(u32);
 DEFTYPE_Result_(Maybe_u32);
 
 
-int closingin1, closingin2, closingin3, closingin4;
-
-
 // XXX TODO: handle Byte order mark?
 
 static
@@ -75,21 +72,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
         }
     }
     if (codepoint <= 0x10FFFF) {
-        {
-            if (codepoint > 0x100FF0) {
-                closingin1++;
-                if (codepoint > 0x10F0F0) {
-                    closingin2++;
-                    if (codepoint > 0x10FF00) {
-                        closingin3++;
-                        if (codepoint > 0x10FFF0) {
-                            closingin4++;
-                            assert(codepoint < 0x10FFFF);
-                        }
-                    }
-                }
-            }
-        }
+        assert(codepoint < 0x10FFFF);
         return Ok(Maybe_u32) Just(u32) codepoint ENDJust ENDOk;
     } else {
         char msg[EBUFSIZ];
