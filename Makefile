@@ -61,6 +61,6 @@ runtests: test.san
 
 
 clean:
-	rm -f $(binaries)
+	rm -f $(binaries) *.gcda
 
 .PHONY: clean
