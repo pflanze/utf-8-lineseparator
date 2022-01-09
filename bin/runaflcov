@@ -32,7 +32,12 @@ export LLVM_PROFILE_FILE=$BIN.profraw
 rm -f "$LLVM_PROFILE_FILE"
 
 (
-    for f in aflfind/crashes/id\:* aflfind/queue/* ; do
+    # aflfind/crashes/id\:* can't be used as the crashes inhibit the
+    # recording of the coverage information, d'oh.  But then, the
+    # purpose of runaflcov is to find places that need to be helped,
+    # when not finding crashes. I.e. just fix your crashes before
+    # using / continuing to use runaflcov!
+    for f in aflfind/queue/* ; do
         if [ -e "$f" ]; then
             echo "== $f ==";
             set +e
