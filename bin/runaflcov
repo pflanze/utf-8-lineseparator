@@ -54,7 +54,7 @@ rm -rf "$profile_file_base"
 "$llvm_profdata" merge -sparse "$profile_file_base"/* -o "$BIN".profdata
 
 # line-oriented coverage report
-if [ "${SHOW_EXPANSIONS-0}" = 1 ]; then
+if [ "${EXPAND-1}" = 1 ]; then
     llvm_cov_flags=--show-expansions
 else
     llvm_cov_flags=
