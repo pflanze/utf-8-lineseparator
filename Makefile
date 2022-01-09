@@ -28,9 +28,11 @@ utf-8-lineseparator.aflsan: utf-8-lineseparator.c $(headers)
 
 utf-8-lineseparator.cov: utf-8-lineseparator.c $(headers)
 	$(compile) -O0 $(COVFLAGS) -o utf-8-lineseparator.cov utf-8-lineseparator.c
+	rm -f utf-8-lineseparator.gcno
 
 utf-8-lineseparator.aflcov: utf-8-lineseparator.c $(headers)
 	afl-clang-fast $(CFLAGS) -O0 $(COVFLAGS) -DAFL=1 -o utf-8-lineseparator.aflcov utf-8-lineseparator.c
+	rm -f utf-8-lineseparator.gcno
 
 test: test.c $(headers)
 	$(compile) -o test test.c
