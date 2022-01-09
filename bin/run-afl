@@ -4,6 +4,7 @@ set -euo pipefail
 IFS=
 
 export AFL_TMPDIR
+export AFL_TESTCACHE_SIZE=300
 export AFL=1
 
 set -x
