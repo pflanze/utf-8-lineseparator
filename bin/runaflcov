@@ -55,11 +55,11 @@ rm -rf "$profile_file_base"
 "$llvm_profdata" merge -sparse "$profile_file_base"/* -o "$BIN".profdata
 
 # line-oriented coverage report
-"$llvm_cov" show "$BIN" -instr-profile="$BIN".profdata -use-color | $PAGER
+"$llvm_cov" show "$BIN" -instr-profile="$BIN".profdata --show-expansions -use-color | $PAGER
 
 # TODO:
 
-# --show-branches=count --show-expansions
+# --show-branches with newer llvm-cov ?
 
 # The llvm-cov tool supports specifying a custom demangler, writing out reports in a directory structure, and generating html reports. For the full list of options, please refer to the command guide.
 
