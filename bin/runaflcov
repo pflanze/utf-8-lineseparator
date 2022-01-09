@@ -27,11 +27,12 @@ done
 PAGER=${PAGER-less}
 
 
-export LLVM_PROFILE_FILE=$BIN.profraw
+profile_file_base=$BIN.profraw
 
-rm -f "$LLVM_PROFILE_FILE"
+rm -f "$profile_file_base".*
 
 (
+    i=0
     # aflfind/crashes/id\:* can't be used as the crashes inhibit the
     # recording of the coverage information, d'oh.  But then, the
     # purpose of runaflcov is to find places that need to be helped,
@@ -40,6 +41,8 @@ rm -f "$LLVM_PROFILE_FILE"
     for f in aflfind/queue/* ; do
         if [ -e "$f" ]; then
             echo "== $f ==";
+            export LLVM_PROFILE_FILE=$profile_file_base.$i
+            i=$(( i + 1 ))
             set +e
             "$BIN" "$f"
             echo $?
@@ -49,7 +52,7 @@ rm -f "$LLVM_PROFILE_FILE"
     done
 ) 2>&1|less
 
-"$llvm_profdata" merge -sparse "$LLVM_PROFILE_FILE" -o "$BIN".profdata
+"$llvm_profdata" merge -sparse "$profile_file_base".* -o "$BIN".profdata
 
 # line-oriented coverage report
 "$llvm_cov" show "$BIN" -instr-profile="$BIN".profdata -use-color | $PAGER

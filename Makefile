@@ -62,6 +62,6 @@ runtestsgdb: test
 
 
 clean:
-	rm -f $(binaries) *.profraw *.profdata
+	rm -f $(binaries) *.profraw.* *.profdata
 
 .PHONY: clean
