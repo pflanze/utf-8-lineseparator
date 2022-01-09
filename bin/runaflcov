@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Called with BIN set to the binary with clang cov instrumentation.
+# https://clang.llvm.org/docs/SourceBasedCodeCoverage.html
+
+set -euo pipefail
+IFS=
+
+_which() {
+    which "$1" > /dev/null 2>&1
+}
+
+for p in llvm-profdata-11 llvm-profdata; do
+    if _which $p; then
+        llvm_profdata=$p
+        break
+    fi
+done
+
+for p in llvm-cov-11 llvm-cov; do
+    if _which $p; then
+        llvm_cov=$p
+        break
+    fi
+done
+
+PAGER=${PAGER-less}
+
+
+export LLVM_PROFILE_FILE=$BIN.profraw
+
+rm -f "$LLVM_PROFILE_FILE"
+
+(
+    for f in aflfind/crashes/id\:* aflfind/queue/* ; do
+        if [ -e "$f" ]; then
+            echo "== $f ==";
+            set +e
+            "$BIN" "$f"
+            echo $?
+            set -e
+            echo
+        fi
+    done
+) 2>&1|less
+
+"$llvm_profdata" merge -sparse "$LLVM_PROFILE_FILE" -o "$BIN".profdata
+
+# line-oriented coverage report
+"$llvm_cov" show "$BIN" -instr-profile="$BIN".profdata -use-color | $PAGER
+
+# TODO:
+
+# --show-branches=count --show-expansions
+
+# The llvm-cov tool supports specifying a custom demangler, writing out reports in a directory structure, and generating html reports. For the full list of options, please refer to the command guide.
+
