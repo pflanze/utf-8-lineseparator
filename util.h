@@ -36,4 +36,17 @@
     for (int var = (from); var < __for_range_to; var++)
 
 
+#define XSTR(s) STR(s)
+#define STR(s) #s
+
+// An alternative to assert from assert.h that works better with
+// coverage for AFL (runaflcov make target)
+#define ASSERT(expr)                            \
+    if (!(expr)) {                              \
+    WARN_("ASSERT failure for %s on %s:%i",     \
+          XSTR(expr), __FILE__, __LINE__);      \
+        abort();                                \
+    }
+
+
 #endif /* UTIL_H_ */
