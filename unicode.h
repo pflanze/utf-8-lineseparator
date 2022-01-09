@@ -75,7 +75,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
     }
     if (codepoint <= 0x10FFFF) {
         LADDER_UP_TO(codepoint, 0, 0x10FFFF);
-        ASSERT(codepoint < 0x10FFFF);
+        ASSERT(codepoint <= 0x10FFFF);
         return Ok(Maybe_u32) Just(u32) codepoint ENDJust ENDOk;
     } else {
         char msg[EBUFSIZ];
