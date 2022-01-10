@@ -88,6 +88,9 @@ __AFL_FUZZ_INIT();
 // # pragma GCC   optimize("O0")
 #endif
 
+// XX configurable?
+#define MONKEY_INIT_LEN 100
+
 int main(int argc, const char**argv) {
 #if AFL
     if (env("AFL")) {
@@ -96,16 +99,21 @@ int main(int argc, const char**argv) {
         unsigned char *buf = __AFL_FUZZ_TESTCASE_BUF;
         while (__AFL_LOOP(1000000)) {
             ssize_t len = __AFL_FUZZ_TESTCASE_LEN;
+            if (len < MONKEY_INIT_LEN) continue;
+            monkey_init(buf, MONKEY_INIT_LEN);
+            unsigned char *bufrest = buf + MONKEY_INIT_LEN;
 
             BufferedStream in = buffer_to_BufferedStream(
                 (Buffer) { .length = len, .readpos = 0, .size = len,
-                    .array = buf, .needs_freeing = false },
+                    .array = bufrest, .needs_freeing = false },
                 (String) { false, "AFL buffer" });
 
             int res = report(&in);
             fprintf(stderr, "report returned with exit code %i\n", res);
             bufferedstream_close(&in);
             bufferedstream_release(&in);
+
+            monkey_release();
 
             leakcheck_verify(true);
         }
