@@ -24,6 +24,8 @@
 #include "buffer.h"
 #include "util.h"
 
+#include "monkey.h"
+
 
 typedef struct { } Unit;
 #define default_Unit {}

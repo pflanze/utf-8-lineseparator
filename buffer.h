@@ -19,7 +19,7 @@ DEFTYPE_Maybe_(u8);
 typedef struct {
     size_t length;
     size_t readpos;
-    const size_t size;
+    /* const */ size_t size;
     unsigned char *array;
     bool needs_freeing;
 } Buffer;
