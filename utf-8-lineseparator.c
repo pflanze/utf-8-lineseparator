@@ -89,7 +89,7 @@ __AFL_FUZZ_INIT();
 #endif
 
 // XX configurable?
-#define MONKEY_INIT_LEN 10
+#define MONKEY_INIT_LEN 0
 
 int main(int argc, const char**argv) {
 #if AFL
