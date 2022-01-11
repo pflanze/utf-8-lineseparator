@@ -31,4 +31,12 @@ char *xstrdup(const char *str) {
     return res;
 }
 
+
+void *xmemcpy(const void *src, size_t n) {
+    void *p = xmalloc(n);
+    memcpy(p, src, n);
+    return p;
+}
+
+
 #endif /* MEM_H_ */
