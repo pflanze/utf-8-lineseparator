@@ -51,7 +51,7 @@ runafl: utf-8-lineseparator.aflsan
 	BIN=./utf-8-lineseparator.aflsan bin/run-afl
 
 runaflcov: utf-8-lineseparator.cov
-	BIN=./utf-8-lineseparator.cov bin/runaflcov
+	bin/runaflcov ./utf-8-lineseparator.cov aflfind
 
 
 runtests: test.san

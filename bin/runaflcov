@@ -1,10 +1,35 @@
 #!/bin/bash
 
-# Called with BIN set to the binary with clang cov instrumentation.
-# https://clang.llvm.org/docs/SourceBasedCodeCoverage.html
-
 set -euo pipefail
 #IFS=
+
+usage () {
+    echo "$0 binary dir(s)"
+    echo "  Runs binary, which must be compiled with clang source"
+    echo "  based code coverage instrumentation[1], on all the files"
+    echo "  in the given dir(s). If a dir contains 'crashes' and"
+    echo "  'queue' folders, the files therein are used, otherwise"
+    echo "  the files directly in the given dir."
+    echo "  Collects the coverage information from all runs and "
+    echo "  displays it."
+    echo "  Note: runs \$PAGER twice, first for the test runs (note:"
+    echo "  scroll to the end of that one so all test runs finish!)"
+    echo "  then again with the coverage view."
+    echo
+    echo "  [1] https://clang.llvm.org/docs/SourceBasedCodeCoverage.html"
+    exit 1
+}
+
+if [ $# -lt 2 ]; then
+    usage
+fi
+if [ "$1" = "-h" -o "$1" = "--help" ]; then
+    usage
+fi
+
+binary=$1
+shift
+
 
 _which() {
     which "$1" > /dev/null 2>&1
@@ -27,31 +52,45 @@ done
 PAGER=${PAGER-less}
 
 
-profile_file_base=$BIN.profraw
+profile_file_base=$binary.profraw
 
 rm -rf "$profile_file_base"
 
+
+runcov() {
+    # dynamic vars: f, i
+    if [ -f "$f" ]; then
+        echo "== $f ==";
+        export LLVM_PROFILE_FILE=$profile_file_base/$i
+        i=$(( i + 1 ))
+        set +e
+        "$binary" "$f"
+        echo $?
+        set -e
+        echo
+    fi
+}
+
 (
     i=0
-    # aflfind/crashes/id\:* can't be used *with* the crashing bug as
-    # the crashes inhibit the recording of the coverage information,
-    # d'oh. But it doesn't hurt either, and just fix your crashes
-    # before using runaflcov to get proper coverage!
-    for f in aflfind/crashes/id\:* aflfind/queue/* ; do
-        if [ -e "$f" ]; then
-            echo "== $f ==";
-            export LLVM_PROFILE_FILE=$profile_file_base/$i
-            i=$(( i + 1 ))
-            set +e
-            "$BIN" "$f"
-            echo $?
-            set -e
-            echo
+    for aflfind in "$@"; do
+        if [ -d "$aflfind"/crashes -a -d "$aflfind"/queue ]; then
+            # $aflfind/crashes/id\:* can't be used *with* the crashing bug as
+            # the crashes inhibit the recording of the coverage information,
+            # d'oh. But it doesn't hurt either, and just fix your crashes
+            # before using runaflcov to get proper coverage!
+            for f in "$aflfind"/crashes/id\:* "$aflfind"/queue/* ; do
+                runcov
+            done
+        else
+            for f in "$aflfind"/*; do
+                runcov
+            done
         fi
     done
 ) 2>&1|less
 
-"$llvm_profdata" merge -sparse "$profile_file_base"/* -o "$BIN".profdata
+"$llvm_profdata" merge -sparse "$profile_file_base"/* -o "$binary".profdata
 
 # line-oriented coverage report
 if [ "${EXPAND-1}" = 1 ]; then
@@ -60,7 +99,7 @@ else
     llvm_cov_flags=
 fi
 
-"$llvm_cov" show "$BIN" -instr-profile="$BIN".profdata $llvm_cov_flags -use-color | $PAGER
+"$llvm_cov" show "$binary" -instr-profile="$binary".profdata $llvm_cov_flags -use-color | $PAGER
 
 # TODO:
 
