@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=
+
+outdir=aflbig
+
+usage() {
+    echo "$0 aflfind*"
+    echo "  collects files from the given dirs/{crashes,queue,hangs},"
+    echo "  and puts them under $outdir under the sha1 hash of their"
+    echo "  contents."
+    exit 1
+}
+
+path_sha1() {
+    local out
+    out=$(sha1sum < "$1")
+    printf '%s' "$out" | awk '{print $1}'
+}
+
+for d in "$@"; do
+    for f in "$d"/{crashes,queue,hangs}/id:*; do
+        if [ -f "$f" ]; then
+            hash=$(path_sha1 "$f")
+            if [ ! -f "$outdir/$hash" ]; then
+                ln "$f" "$outdir/$hash"
+            fi
+        fi
+    done
+done
+
+echo "Done. Now run:"
+echo "  AFL=1 afl-cmin -i aflbig -o afl -- ./utf-8-lineseparator.afl"
