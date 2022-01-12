@@ -30,7 +30,7 @@ MonkeyWrapperState* monkey_monkeywrapperstates[
     MONKEY_MAX_MONKEYWRAPPERSTATE_INSTANCES];
 size_t monkey_monkeywrapperstates_i = 0;
 
-static
+UNUSED static
 void monkey_register_monkeywrapperstate(MonkeyWrapperState *st) {
     if (monkey_monkeywrapperstates_i < MONKEY_MAX_MONKEYWRAPPERSTATE_INSTANCES) {
         monkey_monkeywrapperstates[
@@ -88,7 +88,7 @@ void monkey_release() {
     }
 
 
-static
+UNUSED static
 void monkeywrapperstate_refresh_both(MonkeyWrapperState *s) {
     Maybe_u8 mc = buffer_getc(&monkey_buf);
     if (mc.is_nothing) {
@@ -102,7 +102,7 @@ void monkeywrapperstate_refresh_both(MonkeyWrapperState *s) {
     s->other = mc2.value;
 }    
 
-static
+UNUSED static
 void monkeywrapperstate_refresh_waits(MonkeyWrapperState *s) {
     Maybe_u8 mc = buffer_getc(&monkey_buf);
     if (mc.is_nothing) {
@@ -111,7 +111,7 @@ void monkeywrapperstate_refresh_waits(MonkeyWrapperState *s) {
     s->waits = mc.value;
 }
 
-static
+UNUSED static
 void monkeywrapperstate_refresh_other(MonkeyWrapperState *s) {
     Maybe_u8 mc2 = buffer_getc(&monkey_buf);
     if (mc2.is_nothing) {
