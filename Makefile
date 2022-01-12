@@ -44,10 +44,14 @@ test.san: test.c $(headers)
 all: $(binaries)
 
 
-runaflnosan: utf-8-lineseparator.afl
+afl/1:
+	mkdir -p afl
+	echo > afl/1
+
+runaflnosan: utf-8-lineseparator.afl afl/1
 	BIN=./utf-8-lineseparator.afl bin/run-afl
 
-runafl: utf-8-lineseparator.aflsan
+runafl: utf-8-lineseparator.aflsan afl/1
 	BIN=./utf-8-lineseparator.aflsan bin/run-afl
 
 runaflcov: utf-8-lineseparator.cov
