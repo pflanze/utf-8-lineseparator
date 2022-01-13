@@ -64,6 +64,10 @@ runtests: test.san
 runtestsgdb: test
 	gdbrun ./test
 
+check: runtests
+
+checkgdb: runtestsgdb
+
 
 clean:
 	rm -f $(binaries) *.profdata

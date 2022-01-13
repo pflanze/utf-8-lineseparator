@@ -37,7 +37,7 @@ Just tooling, so far:
   `utf-8-lineseparator.cov`): LLVM tooling (e.g. `llvm-11` in Debian
   Bullseye)
 
-- For the `runtestsgdb` target: `gdbrun` from
+- For the `checkgdb` target: `gdbrun` from
   [chj-bin](https://github.com/pflanze/chj-bin) (could be simplified
   or replaced, I'm just used to it).
 
@@ -48,11 +48,11 @@ The production executable is `utf-8-lineseparator`, built via `make`.
 Have a look at the [Makefile](Makefile) for the variables that can be
 set, notable `CC` (gcc and clang are known to work).
 
-For some testing, run `make runtests`.
+For some testing, run `make check`.
 
 Proper extensive testing is done via `make runafl`. More documentation
 has to be written about this; generated test cases from AFL should be
-added to the test suite run by `make runtests` (todo).
+added to the test suite run by `make check` (todo).
 
 ## More information
 
