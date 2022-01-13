@@ -54,3 +54,9 @@ Proper extensive testing is done via `make runafl`. More documentation
 has to be written about this; generated test cases from AFL should be
 added to the test suite run by `make runtests` (todo).
 
+## More information
+
+* [Approach](docs/approach.md) to see how C is used usefully
+* [Design](docs/design.md) to help into coding on the project
+* [TODO](docs/TODO.md) for open issues
+
