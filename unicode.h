@@ -19,8 +19,6 @@ DEFTYPE_Maybe_(u32);
 DEFTYPE_Result_(Maybe_u32);
 
 
-// XXX TODO: handle Byte order mark?
-
 static
 Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
     // https://en.wikipedia.org/wiki/Utf-8#Encoding
