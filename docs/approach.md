@@ -136,11 +136,11 @@ mbps upload speeds.
 
 The following could be implemented in steps:
 
- 0. Auto-convert non-LF line endings to LF ones instead of just
+ 1. Auto-convert non-LF line endings to LF ones instead of just
     reporting them.
- 0. Auto-detect and -convert non-UTF-8 charset encodings to UTF-8
+ 1. Auto-detect and -convert non-UTF-8 charset encodings to UTF-8
     instead of just reporting them.
- 0. Port the checks in [gnqc](https://git.genenetwork.org/jgart/gnqc)
+ 1. Port the checks in [gnqc](https://git.genenetwork.org/jgart/gnqc)
       - CSV parsing probably via
         [libcsv](https://github.com/rgamble/libcsv) ([in
         Debian](https://packages.debian.org/bullseye/libcsv3))
