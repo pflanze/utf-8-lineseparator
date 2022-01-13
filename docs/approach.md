@@ -144,11 +144,12 @@ The following could be implemented in steps:
       - CSV parsing probably via
         [libcsv](https://github.com/rgamble/libcsv) ([in
         Debian](https://packages.debian.org/bullseye/libcsv3))
-      - implement as a CGI (or [SCGI](Simple Common Gateway
-        Interface), or FastCGI) handler, behind lighttpd, Apache or
-        Nginx (CGI would be preferable since it's the simplest and the
-        startup overhead is negligible in this case, but Nginx doesn't
-        support it)
+      - implement as a CGI (or
+        [SCGI](https://en.wikipedia.org/wiki/Simple_Common_Gateway_Interface),
+        or FastCGI) handler, behind lighttpd, Apache or Nginx (CGI
+        would be preferable since it's the simplest and the startup
+        overhead is negligible in this case, but Nginx doesn't support
+        it)
       - give the check results as JSON (which is probably what's
         needed for real-time use, both when running inside the browser
         via WASM, or when read from the server via JavaScript)
