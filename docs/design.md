@@ -142,6 +142,10 @@ representing a string constant:
 
     (String) { false, "some constant string" }
 
+There's a macro to write this in a shorter, more expressive way:
+
+    String_literal("some constant string")
+
 #### Ownership handling, work in progress
 
 The `needs_freeing` approach is also currently being (mis)used for

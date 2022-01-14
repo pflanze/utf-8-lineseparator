@@ -106,7 +106,7 @@ int main(int argc, const char**argv) {
             BufferedStream in = buffer_to_BufferedStream(
                 (Buffer) { .length = len, .readpos = 0, .size = len,
                     .array = bufrest, .needs_freeing = false },
-                (String) { false, "AFL buffer" });
+                String_literal("AFL buffer"));
 
             int res = report(&in);
             fprintf(stderr, "report returned with exit code %i\n", res);
@@ -125,7 +125,7 @@ int main(int argc, const char**argv) {
             BufferedStream in =
                 fd_BufferedStream(0,
                                   STREAM_DIRECTION_IN,
-                                  (String) { false, "STDIN" },
+                                  String_literal("STDIN"),
                                   false);
             int res = report(&in);
             Result_Unit r = bufferedstream_close(&in);
@@ -144,7 +144,7 @@ int main(int argc, const char**argv) {
         } else if (argc == 2) {
             const char *path = argv[1];
             Result_BufferedStream r_in =
-                open_BufferedStream((String) { false, path },
+                open_BufferedStream(String_borrowing(path),
                                     O_RDONLY);
             if (result_is_failure(r_in)) {
                 // XX should this have the path in the message,

@@ -7,7 +7,6 @@
 #define IO_H_
 
 #include "string.h"
-#include "mem.h" /* xstrdup */
 
 
 static
@@ -15,7 +14,7 @@ String strerror_String(int err) {
 #define EBUFSIZ 256
     char msg[EBUFSIZ];
     strerror_r(err, msg, EBUFSIZ);
-    return (String){ true, xstrdup(msg) };
+    return String_copy(msg);
 #undef EBUFSIZ
 }
 

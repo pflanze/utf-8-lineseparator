@@ -15,12 +15,10 @@
         T ok;                                   \
     } Result_##T;
 
-#define Error(T, needs_freeing, str)                            \
-    (Result_##T) { (String) { needs_freeing, str }, default_##T }
-#define string_Error(T, string)                                 \
+#define Error(T, string)                        \
     (Result_##T) { string, default_##T }
 #define Ok(T)                                                   \
-    (Result_##T) { (String) { false, NULL }, (T)
+    (Result_##T) { noString, (T)
 #define ENDOk }
 
 #define result_is_success(v) (!((v).failure.str))

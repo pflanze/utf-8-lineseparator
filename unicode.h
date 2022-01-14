@@ -7,7 +7,6 @@
 #define UNICODE_H_
 
 
-#include "mem.h"
 #include "shorttypenames.h" /* u8 u32 */
 #include "bufferedstream.h"
 #include "result.h"
@@ -44,9 +43,8 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
             numbytes = 4;
             codepoint = b1.ok.value & 0b111;
         } else {
-            return Error(
-                Maybe_u32, false,
-                "invalid start byte decoding UTF-8");
+            return Error(Maybe_u32, String_literal(
+                             "invalid start byte decoding UTF-8"));
         }
         for (int i = 1; i < numbytes; i++) {
             Result_Maybe_u8 b = bufferedstream_getc(in);
@@ -56,14 +54,14 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
                 snprintf(msg, EBUFSIZ,
                          "premature EOF decoding UTF-8 (byte #%i)",
                          i+1);
-                return Error(Maybe_u32, true, xstrdup(msg));
+                return Error(Maybe_u32, String_copy(msg));
             }
             if ((b.ok.value & 0b11000000) != 0b10000000) {
                 char msg[EBUFSIZ];
                 snprintf(msg, EBUFSIZ,
                          "invalid continuation byte decoding UTF-8 (byte #%i)",
                          i+1);
-                return Error(Maybe_u32, true, xstrdup(msg));
+                return Error(Maybe_u32, String_copy(msg));
             }
             codepoint <<= 6;
             codepoint |= (b.ok.value & 0b00111111);
@@ -76,7 +74,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
         snprintf(msg, EBUFSIZ,
                  "invalid unicode codepoint (%u, 0x%x)",
                  codepoint, codepoint);
-        return Error(Maybe_u32, true, xstrdup(msg));
+        return Error(Maybe_u32, String_copy(msg));
     }
 #undef EBUFSIZ
 }

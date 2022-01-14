@@ -17,6 +17,15 @@ typedef struct {
 
 #define noString (String) { false, NULL }
 
+#define String_literal(literal)                 \
+    (String) { false, "" literal }
+#define String_borrowing(v)                     \
+    (String) { false, (v) }
+#define String_allocated(v)                     \
+    (String) { true, (v) }
+#define String_copy(v)                          \
+    (String) { true, xstrdup(v) }
+
 static
 void string_release(String s) {
     if (s.needs_freeing) {
@@ -59,7 +68,7 @@ push_error:
     out[out_i++] = '.';
 finish:
     out[out_i++] = '\0';
-    return (String) { true, xstrdup(out) };
+    return String_copy(out);
 #undef QBUFSIZ
 }
 

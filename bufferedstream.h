@@ -73,7 +73,8 @@ String /* owned by receiver */ bufferedstream_name_sh(BufferedStream *s) {
     if (s->has_path) {
         return string_quote_sh(s->maybe_path_or_name.str);
     } else {
-        return (String) { false, s->maybe_path_or_name.str };
+        // XX evil life time handling; copy?
+        return String_borrowing(s->maybe_path_or_name.str);
     }
 }
 
@@ -134,7 +135,7 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
         int err = errno;
         string_release(path);
         free(buf);
-        return string_Error(BufferedStream, strerror_String(err));
+        return Error(BufferedStream, strerror_String(err));
     }
     return Ok(BufferedStream) (BufferedStream) {
         (Buffer) {
@@ -182,7 +183,7 @@ void bufferedstream_free(BufferedStream *s) {
 static
 Result_Unit bufferedstream_close(BufferedStream *s) {
     if (s->is_closed) {
-        return Error(Unit, false, "stream is already closed");
+        return Error(Unit, String_literal("stream is already closed"));
     }
     s->is_closed = true;
     s->buffer.length = 0;
@@ -209,7 +210,7 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
             // unclear!
             s->filestream.maybe_fd = FD_NOTHING;
             s->filestream.maybe_failure = strerror_String(err);
-            return string_Error(Unit, s->filestream.maybe_failure);
+            return Error(Unit, s->filestream.maybe_failure);
         }
         s->filestream.maybe_fd = FD_NOTHING;
         return Ok(Unit) {} ENDOk;
@@ -222,7 +223,7 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
 static
 Result_Maybe_u8 bufferedstream_getc(BufferedStream *in) {
     if (in->is_closed)
-        return Error(Maybe_u8, false, "stream is closed");
+        return Error(Maybe_u8, String_literal("stream is closed"));
     Maybe_u8 c = buffer_getc(&in->buffer);
     if (maybe_is_just(c)) {
         return Ok(Maybe_u8) c ENDOk;
