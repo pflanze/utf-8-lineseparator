@@ -25,11 +25,12 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
         (Buffer) {
             .length = inlen,
             .size = inlen,
-            .readpos = 0,
+            .pos = 0,
             .array = (unsigned char*)inbuf,
             // ^ XX provide ConstBuffer instead?
             .needs_freeing = false
         },
+        STREAM_DIRECTION_IN,
         String_literal("buf"));
     Result_Maybe_u32 rmc = get_unicodechar(&in);
     PROPAGATEL_Result(_rmc, u32, rmc);
