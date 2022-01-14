@@ -249,54 +249,54 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
 }
 
 static
-Result_Maybe_u8 bufferedstream_getc(BufferedStream *in) {
-    assert(in->direction & STREAM_DIRECTION_IN);
+Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
+    assert(s->direction & STREAM_DIRECTION_IN);
 
-    if (in->is_closed) {
+    if (s->is_closed) {
         return Error(Maybe_u8, String_literal("stream is closed"));
     }
-    Maybe_u8 c = buffer_getc(&in->buffer);
+    Maybe_u8 c = buffer_getc(&s->buffer);
     if (maybe_is_just(c)) {
         return Ok(Maybe_u8) c ENDOk;
     } else {
-        if (in->stream_type == STREAM_TYPE_BUFFERSTREAM) {
-            // there's nothing to do with in->bufferstream, simply:
+        if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
+            // there's nothing to do with s->bufferstream, simply:
             return Ok(Maybe_u8) Nothing(u8) ENDOk;
         }
-        else if (in->stream_type == STREAM_TYPE_FILESTREAM) {
-            if (in->filestream.is_exhausted) {
+        else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
+            if (s->filestream.is_exhausted) {
                 return Ok(Maybe_u8) Nothing(u8) ENDOk;
-            } else if (in->filestream.maybe_failure.str) {
+            } else if (s->filestream.maybe_failure.str) {
                 // return previously seen failure (OK?)
                 return (Result_Maybe_u8) {
-                    in->filestream.maybe_failure,
+                    s->filestream.maybe_failure,
                     Nothing(u8)
                 };
             } else {
                 // replenish the buffer
-                assert(in->filestream.maybe_fd != FD_NOTHING);
-                int fd = in->filestream.maybe_fd;
+                assert(s->filestream.maybe_fd != FD_NOTHING);
+                int fd = s->filestream.maybe_fd;
             retry: {
-                    int n = read(fd, in->buffer.array, in->buffer.size);
+                    int n = read(fd, s->buffer.array, s->buffer.size);
                     if (n < 0) {
                         int err = errno;
                         if (err == EINTR) {
                             goto retry;
                         }
-                        in->filestream.maybe_failure = strerror_String(err);
+                        s->filestream.maybe_failure = strerror_String(err);
                         /* return (Result_Maybe_u8) { */
-                        /*     in->filestream.maybe_failure, */
+                        /*     s->filestream.maybe_failure, */
                         /*     Nothing(u8) */
                         /* }; */
                     } else if (n == 0) {
                         // EOF
-                        in->filestream.is_exhausted = true;
+                        s->filestream.is_exhausted = true;
                         //return Ok(Maybe_u8) Nothing(u8) ENDOk;
                     } else {
-                        in->buffer.length = n;
-                        in->buffer.pos = 0;
+                        s->buffer.length = n;
+                        s->buffer.pos = 0;
                     }
-                    return bufferedstream_getc(in);
+                    return bufferedstream_getc(s);
                 }
             }
         }
