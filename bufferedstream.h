@@ -252,8 +252,9 @@ static
 Result_Maybe_u8 bufferedstream_getc(BufferedStream *in) {
     assert(in->direction & STREAM_DIRECTION_IN);
 
-    if (in->is_closed)
+    if (in->is_closed) {
         return Error(Maybe_u8, String_literal("stream is closed"));
+    }
     Maybe_u8 c = buffer_getc(&in->buffer);
     if (maybe_is_just(c)) {
         return Ok(Maybe_u8) c ENDOk;
