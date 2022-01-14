@@ -124,16 +124,17 @@ program termination, basically like uncaught exceptions.)
 
 Standard C strings are simply pointers to an array of 8-bit characters
 (bytes), with a 0-byte at the end indicating the end of the
-string. They can be allocated both from the heap, or also statically
-as constants. In the former case they have to be `free`d, not so in
-the latter. Since a receiver of a string doesn't necessarily know
+string. They can be allocated from the heap, as constants (indefinite
+life time), or on the stack with a dynamically scoped life time. In
+the first case they have to be `free`d, not so in the latter two
+cases. Since a receiver of a string doesn't necessarily know
 statically which case it is dealing with, the strings would either
 *always* have to be heap-allocated (imposing overhead), or the
 knowledge about which case it is dealing with has to be included at
 runtime when passing that string.
 
-The type `String` from [string.h](../string.h) is used for this. The
-attribute `needs_freeing` embodies the knowledge about which case it
+The type `String` from [string.h](../string.h) is used for the latter approach.
+The attribute `needs_freeing` embodies the knowledge about which case it
 is representing. The `string_release(String s)` function releases the
 memory associated with the string, *iff* needed (i.e. `needs_freeing`
 is true). A `String` is created by simply passing the boolean along
