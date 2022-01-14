@@ -119,7 +119,9 @@ issues. Also, a nice side benefit of the AFL++ based testing will be
 catching bugs in general, not just memory related ones.
 
 (Further security layers, like maybe lighttpd's chroot support, could
-be used if there's still doubt about the security aspect.)
+be used if there's still doubt about the security aspect. Or use of
+Linux's [seccomp](https://en.wikipedia.org/wiki/Seccomp) could be
+integrated.)
 
 ## Speed
 
