@@ -73,8 +73,7 @@ String /* owned by receiver */ bufferedstream_name_sh(BufferedStream *s) {
     if (s->has_path) {
         return string_quote_sh(s->maybe_path_or_name.str);
     } else {
-        // XX evil life time handling; copy?
-        return String_borrowing(s->maybe_path_or_name.str);
+        return String_copy(s->maybe_path_or_name.str);
     }
 }
 
