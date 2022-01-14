@@ -1,7 +1,7 @@
 # File checker tool and framework for safe and somewhat Rust-like coding in C
 
-This provides a tool to efficiently check text (CSV) files for valid
-UTF-8 use, and to report which line endings they use. It is about 50x
+This provides a tool to efficiently check text files for valid UTF-8
+use, and to report which line separators they use. It is about 50x
 faster than a corresponding Python program. It is currently used in
 [gnqc](https://git.genenetwork.org/jgart/gnqc), and could easily be
 extended to take on more functionality.
@@ -19,6 +19,21 @@ verifying via coverage tooling that no part remains untested, we hope
 to scale this up to larger programs.  The project also takes a number
 of further approaches to minimize the potential issues. See our
 [approach](docs/approach.md) for further details.
+
+## Note about CSV
+
+[CSV](https://en.wikipedia.org/wiki/Comma-separated_values) files can
+contain line breaks embedded within cells; those might be different
+ones than the line separator used to separate
+rows. `utf-8-lineseparator` is reporting separate counts of all 3 line
+separators (CR, LF, CRLF), thus it could report non-zero numbers for
+multiple of those in such cases, without this meaning that the file is
+broken. `utf-8-lineseparator` does not currently attempt to parse the
+file as CSV.
+
+([gnqc](https://git.genenetwork.org/jgart/gnqc) currently disallows
+line separators inside cells, thus such a case can't happen in files
+deemed valid in that project.)
 
 ## Dependencies
 
