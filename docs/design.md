@@ -89,14 +89,14 @@ compiler's `-E` flag (todo: generate expanded files as part of the
 build by default).
 
 Since the `DEFTYPE_Maybe_` macro creates a new type name by simply
-appending the name of the type given to it as its argument to
+appending the name of the type given as its argument to
 `Maybe_`, the argument must not contain anything other than word
 characters (`\w+`). For this reason, `typedef` is consistently used to
 create type names that do not contain spaces or other punctuation,
 e.g. generating the punctuation-less type name `str` above, but also
 why `DEFTYPE_Maybe_` defines `Maybe_int` as a typedef so that the
-`struct ` prefix isn't needed, so that it could itself be used as a
-parameter in another DEFTYPE style macro.
+`struct ` prefix isn't needed, so that the `Maybe_int` type itself be
+used as a parameter for another DEFTYPE style macro.
 
 The Maybe types need to be checked via their `.is_nothing` attribute
 whether they actually contain a value.
