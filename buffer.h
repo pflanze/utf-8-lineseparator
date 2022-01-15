@@ -25,6 +25,13 @@ typedef struct {
 } Buffer;
 
 static
+void buffer_assert(Buffer *s) {
+    assert(s->size >= s->length);
+    assert(s->length >= s->pos);
+    assert(s->array);
+}
+
+static
 void buffer_release(Buffer *b) {
     if (b->needs_freeing) free(b->array);
     b->array = NULL;
