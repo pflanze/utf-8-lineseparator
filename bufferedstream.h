@@ -90,6 +90,13 @@ BufferedStream buffer_to_BufferedStream(Buffer s /* owned */,
                                         uint8_t direction,
                                         String name /* owned */) {
     assert_direction(direction);
+    buffer_assert(&s);
+    if ((direction & STREAM_DIRECTION_OUT) && s.size == 0) {
+        /* return Error(Unit, String_literal( */
+        /*                  "can't use buffer of size 0 for writing")); */
+        // Treat this as a bug, to keep the return type non-Result, hmm?
+        DIE("can't use buffer of size 0 for writing");
+    }
 
     return (BufferedStream) {
         .buffer = s,
@@ -114,10 +121,12 @@ BufferedStream fd_BufferedStream(int fd,
     unsigned char *buf = xmalloc(BSIZ);
     return (BufferedStream) {
         (Buffer) {
-            .length = 0,
-            .pos = 0,
+            .slice = (Slice_u8) {
+                .startpos = 0,
+                .endpos = 0,
+                .data = buf
+            },
             .size = BSIZ,
-            .array = buf,
             .needs_freeing = true
         },
         .is_closed = false,
@@ -163,10 +172,12 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
     }
     return Ok(BufferedStream) (BufferedStream) {
         (Buffer) {
-            .length = 0,
-            .pos = 0,
+            .slice = (Slice_u8) {
+                .startpos = 0,
+                .endpos = 0,
+                .data = buf
+            },
             .size = BSIZ,
-            .array = buf,
             .needs_freeing = true
         },
         .is_closed = false,
@@ -214,8 +225,8 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
         return Error(Unit, String_literal("stream is already closed"));
     }
     s->is_closed = true;
-    s->buffer.length = 0;
-    s->buffer.pos = 0;
+    s->buffer.slice.startpos = 0;
+    s->buffer.slice.endpos = 0;
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
         // nothing else to do
         return Ok(Unit) {} ENDOk;
@@ -277,7 +288,7 @@ Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
                 assert(s->filestream.maybe_fd != FD_NOTHING);
                 int fd = s->filestream.maybe_fd;
             retry: {
-                    int n = read(fd, s->buffer.array, s->buffer.size);
+                    int n = read(fd, s->buffer.slice.data, s->buffer.size);
                     if (n < 0) {
                         int err = errno;
                         if (err == EINTR) {
@@ -293,11 +304,59 @@ Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
                         s->filestream.is_exhausted = true;
                         //return Ok(Maybe_u8) Nothing(u8) ENDOk;
                     } else {
-                        s->buffer.length = n;
-                        s->buffer.pos = 0;
+                        s->buffer.slice.startpos = 0;
+                        s->buffer.slice.endpos = n;
                     }
                     return bufferedstream_getc(s);
                 }
+            }
+        }
+        else {
+            DIE("invalid stream_type");
+        }
+    }
+}
+
+static
+Result_Unit bufferedstream_putc(BufferedStream *s, unsigned char c) {
+    assert(s->direction & STREAM_DIRECTION_OUT);
+
+    if (s->is_closed) {
+        return Error(Unit, String_literal("stream is closed"));
+    }
+    if (buffer_putc(&s->buffer, c)) {
+        return Ok(Unit) {} ENDOk;
+    } else {
+        if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
+            // XX include name in message, right?
+            return Error(Unit, String_literal("out of space"));
+        }
+        else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
+            assert(s->buffer.size > 0); // otherwise it would loop endlessly
+            // Write out the buffer
+            assert(s->filestream.maybe_fd != FD_NOTHING);
+            int fd = s->filestream.maybe_fd;
+        retry: {
+                int n = write(fd,
+                              slice_start(s->buffer.slice),
+                              slice_length(s->buffer.slice));
+                if (n < 0) {
+                    int err = errno;
+                    if (err == EINTR) {
+                        goto retry;
+                    }
+                    s->filestream.maybe_failure = strerror_String(err);
+                } else if (n == slice_length(s->buffer.slice)) {
+                    // done
+                    s->buffer.slice.startpos = 0;
+                    s->buffer.slice.endpos = 0;
+                } else {
+                    // partial write
+                    s->buffer.slice.startpos += n;
+                    assert(s->buffer.slice.startpos <=
+                           s->buffer.slice.endpos);
+                }
+                return bufferedstream_putc(s, c);
             }
         }
         else {
