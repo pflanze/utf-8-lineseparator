@@ -7,6 +7,7 @@ utf-8-lineseparator.cov
 utf-8-lineseparator.aflcov
 .gdb_history
 /afl*
-/test*
+/test
+/test.san
 *.profraw*
 *.profdata
