@@ -61,10 +61,12 @@ static
 void monkey_init(unsigned char *buf /* borrowed */,
                  size_t len) {
     monkey_buf = (Buffer) {
-        .length = len,
-        .readpos = 0,
+        .slice = (Slice_u8) {
+            .startpos = 0,
+            .endpos = len,
+            .data = xmemcpy(buf, len)
+        },
         .size = len,
-        .array = xmemcpy(buf, len),
         .needs_freeing = true
     };
     for (size_t i = 0; i < monkey_monkeywrapperstates_i; i++) {

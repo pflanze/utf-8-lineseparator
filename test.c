@@ -23,11 +23,13 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
     BEGINRETURN(Result_u32);
     BufferedStream in = buffer_to_BufferedStream(
         (Buffer) {
-            .length = inlen,
+            .slice = (Slice_u8) {
+                .startpos = 0,
+                .endpos = inlen,
+                .data = (unsigned char*)inbuf
+                // ^ XX provide ConstBuffer instead?
+            },
             .size = inlen,
-            .pos = 0,
-            .array = (unsigned char*)inbuf,
-            // ^ XX provide ConstBuffer instead?
             .needs_freeing = false
         },
         STREAM_DIRECTION_IN,
