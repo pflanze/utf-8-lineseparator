@@ -43,8 +43,8 @@
 // coverage for AFL (runaflcov make target)
 #define ASSERT(expr)                            \
     if (!(expr)) {                              \
-    WARN_("ASSERT failure for %s on %s:%i",     \
-          XSTR(expr), __FILE__, __LINE__);      \
+        WARN_("ASSERT failure for %s on %s:%i", \
+              XSTR(expr), __FILE__, __LINE__);  \
         abort();                                \
     }
 
