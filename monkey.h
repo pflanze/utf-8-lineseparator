@@ -58,17 +58,11 @@ MonkeyWrapperState new_MonkeyWrapperState() {
 }
 
 static
-void monkey_init(unsigned char *buf /* borrowed */,
+void monkey_init(unsigned char *array /* borrowed */,
                  size_t len) {
-    monkey_buf = (Buffer) {
-        .slice = (Slice_u8) {
-            .startpos = 0,
-            .endpos = len,
-            .data = xmemcpy(buf, len)
-        },
-        .size = len,
-        .needs_freeing = true
-    };
+    monkey_buf = Buffer_from_array(true,
+                                   xmemcpy(array, len),
+                                   len);
     for (size_t i = 0; i < monkey_monkeywrapperstates_i; i++) {
         *(monkey_monkeywrapperstates[i]) = new_MonkeyWrapperState();
     }

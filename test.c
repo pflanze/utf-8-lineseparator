@@ -22,16 +22,8 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
                                  size_t inlen) {
     BEGINRETURN(Result_u32);
     BufferedStream in = buffer_to_BufferedStream(
-        (Buffer) {
-            .slice = (Slice_u8) {
-                .startpos = 0,
-                .endpos = inlen,
-                .data = (unsigned char*)inbuf
-                // ^ XX provide ConstBuffer instead?
-            },
-            .size = inlen,
-            .needs_freeing = false
-        },
+        Buffer_from_array(false, (unsigned char*)inbuf, inlen),
+        //                       ^ XX provide ConstBuffer instead?
         STREAM_DIRECTION_IN,
         String_literal("buf"));
     Result_Maybe_u32 rmc = get_unicodechar(&in);

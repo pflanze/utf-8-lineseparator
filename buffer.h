@@ -12,6 +12,7 @@
 #include "shorttypenames.h"
 #include "maybe.h"
 #include "slice.h"
+#include "util.h" /* UNUSED */
 
 
 DEFTYPE_Maybe_(u8);
@@ -32,6 +33,19 @@ void buffer_assert(Buffer *s) {
     assert(s->slice.endpos <= s->size);
     assert(s->slice.startpos <= s->slice.endpos);
     assert(s->slice.data);
+}
+
+static UNUSED
+Buffer Buffer_from_array(bool needs_freeing, unsigned char *array, size_t size) {
+    return (Buffer) {
+        .slice = (Slice_u8) {
+            .startpos = 0,
+            .endpos = size,
+            .data = array
+        },
+        .size = size,
+        .needs_freeing = needs_freeing
+    };
 }
 
 static

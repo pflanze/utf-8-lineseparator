@@ -104,15 +104,9 @@ int main(int argc, const char**argv) {
             unsigned char *bufrest = buf + MONKEY_INIT_LEN;
 
             BufferedStream in = buffer_to_BufferedStream(
-                (Buffer) {
-                    .slice = (Slice_u8) {
-                        .startpos = 0,
-                        .endpos = len,
-                        .data = bufrest
-                    },
-                    .size = len,
-                    .needs_freeing = false
-                },
+                Buffer_from_array(false,
+                                  bufrest,
+                                  len),
                 STREAM_DIRECTION_IN,
                 String_literal("AFL buffer"));
 
