@@ -46,14 +46,25 @@ typedef struct {
 } _FileStream;
 
 
+#define STREAM_DIRECTION_IN 1
+#define STREAM_DIRECTION_OUT 2
+#define STREAM_DIRECTION_INOUT 3
+static
+void assert_direction(uint8_t direction) {
+    assert((direction >= STREAM_DIRECTION_IN)
+           && (direction <= STREAM_DIRECTION_INOUT));
+}
+
+
 #define STREAM_TYPE_BUFFERSTREAM 1
 #define STREAM_TYPE_FILESTREAM 2
 
 typedef struct {
     Buffer buffer;
-    bool is_closed; // in which case buffer's readpos == length == 0
+    bool is_closed; // in which case buffer's pos == length == 0
     bool has_path; // whether a path is given in maybe_path_or_name
     String maybe_path_or_name;
+    const uint8_t direction;
     const uint8_t stream_type;
     union {
         _BufferStream bufferstream;
@@ -62,10 +73,6 @@ typedef struct {
 } BufferedStream;
 
 #define default_BufferedStream (BufferedStream){}
-
-#define STREAM_DIRECTION_IN 1
-/* #define STREAM_DIRECTION_OUT 2 */
-/* #define STREAM_DIRECTION_INOUT 3 */
 
 UNUSED static
 String /* owned by receiver */ bufferedstream_name_sh(BufferedStream *s) {
@@ -80,12 +87,16 @@ String /* owned by receiver */ bufferedstream_name_sh(BufferedStream *s) {
 
 UNUSED static
 BufferedStream buffer_to_BufferedStream(Buffer s /* owned */,
+                                        uint8_t direction,
                                         String name /* owned */) {
+    assert_direction(direction);
+
     return (BufferedStream) {
         .buffer = s,
         .is_closed = false,
         .has_path = false,
         .maybe_path_or_name = name,
+        .direction = direction,
         .stream_type = STREAM_TYPE_BUFFERSTREAM,
         .bufferstream = {}
     };
@@ -93,17 +104,18 @@ BufferedStream buffer_to_BufferedStream(Buffer s /* owned */,
 
 UNUSED static
 BufferedStream fd_BufferedStream(int fd,
-                                 int direction,
+                                 uint8_t direction,
                                  String maybe_path_or_name /* owned */,
                                  bool is_path) {
     assert(fd >= 0);
-    assert(direction == STREAM_DIRECTION_IN); // for now
+    assert_direction(direction);
+    
 #define BSIZ 4096
     unsigned char *buf = xmalloc(BSIZ);
     return (BufferedStream) {
         (Buffer) {
             .length = 0,
-            .readpos = 0,
+            .pos = 0,
             .size = BSIZ,
             .array = buf,
             .needs_freeing = true
@@ -111,6 +123,7 @@ BufferedStream fd_BufferedStream(int fd,
         .is_closed = false,
         .has_path = is_path,
         .maybe_path_or_name = maybe_path_or_name,
+        .direction = direction,
         .stream_type = STREAM_TYPE_FILESTREAM,
         .filestream = (_FileStream) {
             .maybe_fd = fd,
@@ -126,7 +139,19 @@ DEFTYPE_Result_(BufferedStream);
 UNUSED static
 Result_BufferedStream open_BufferedStream(String path /* owned */,
                                           int flags) {
-    assert(flags == O_RDONLY); // for now
+    // The flags are 0, 1, 2 on Linux, but ? HACKY.
+    const int flags_directions = flags & (O_RDONLY | O_WRONLY | O_RDWR);
+    uint8_t direction;
+    if (flags_directions == O_RDWR) {
+        direction = STREAM_DIRECTION_INOUT;
+    } else if (flags_directions == O_WRONLY) {
+        direction = STREAM_DIRECTION_OUT;
+    } else if (flags_directions == O_RDONLY) {
+        direction = STREAM_DIRECTION_IN;
+    } else {
+        DIE("invalid flags");
+    }
+    
 #define BSIZ 4096
     unsigned char *buf = xmalloc(BSIZ);
     int fd = open(path.str, flags);
@@ -139,7 +164,7 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
     return Ok(BufferedStream) (BufferedStream) {
         (Buffer) {
             .length = 0,
-            .readpos = 0,
+            .pos = 0,
             .size = BSIZ,
             .array = buf,
             .needs_freeing = true
@@ -147,6 +172,7 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
         .is_closed = false,
         .has_path = true,
         .maybe_path_or_name = path,
+        .direction = direction,
         .stream_type = STREAM_TYPE_FILESTREAM,
         .filestream = (_FileStream) {
             .maybe_fd = fd,
@@ -161,6 +187,9 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
 static
 void bufferedstream_release(BufferedStream *s) {
     assert(s->is_closed);
+    assert_direction(s->direction); // paranoia (to catch all usage
+                                    // patterns)
+
     buffer_release(&s->buffer);
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
         // nothing
@@ -186,7 +215,7 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
     }
     s->is_closed = true;
     s->buffer.length = 0;
-    s->buffer.readpos = 0;
+    s->buffer.pos = 0;
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
         // nothing else to do
         return Ok(Unit) {} ENDOk;
@@ -221,6 +250,8 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
 
 static
 Result_Maybe_u8 bufferedstream_getc(BufferedStream *in) {
+    assert(in->direction & STREAM_DIRECTION_IN);
+
     if (in->is_closed)
         return Error(Maybe_u8, String_literal("stream is closed"));
     Maybe_u8 c = buffer_getc(&in->buffer);
@@ -262,7 +293,7 @@ Result_Maybe_u8 bufferedstream_getc(BufferedStream *in) {
                         //return Ok(Maybe_u8) Nothing(u8) ENDOk;
                     } else {
                         in->buffer.length = n;
-                        in->buffer.readpos = 0;
+                        in->buffer.pos = 0;
                     }
                     return bufferedstream_getc(in);
                 }
