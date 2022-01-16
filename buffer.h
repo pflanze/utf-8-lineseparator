@@ -48,6 +48,22 @@ Buffer Buffer_from_array(bool needs_freeing, unsigned char *array, size_t size) 
     };
 }
 
+// Same as Buffer_from_array but initializes the active content length
+// to 0, i.e. buf is only used for reading into / writing to, not as
+// data source.
+static UNUSED
+Buffer Buffer_from_buf(bool needs_freeing, unsigned char *buf, size_t size) {
+    return (Buffer) {
+        .slice = (Slice_u8) {
+            .startpos = 0,
+            .endpos = 0,
+            .data = buf
+        },
+        .size = size,
+        .needs_freeing = needs_freeing
+    };
+}
+
 static
 void buffer_release(Buffer *b) {
     if (b->needs_freeing) free(b->slice.data);

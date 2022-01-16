@@ -118,17 +118,10 @@ BufferedStream fd_BufferedStream(int fd,
     assert_direction(direction);
     
 #define BSIZ 4096
-    unsigned char *buf = xmalloc(BSIZ);
     return (BufferedStream) {
-        (Buffer) {
-            .slice = (Slice_u8) {
-                .startpos = 0,
-                .endpos = 0,
-                .data = buf
-            },
-            .size = BSIZ,
-            .needs_freeing = true
-        },
+        .buffer = Buffer_from_buf(true,
+                                  xmalloc(BSIZ),
+                                  BSIZ),
         .is_closed = false,
         .has_path = is_path,
         .maybe_path_or_name = maybe_path_or_name,
@@ -171,15 +164,9 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
         return Error(BufferedStream, strerror_String(err));
     }
     return Ok(BufferedStream) (BufferedStream) {
-        (Buffer) {
-            .slice = (Slice_u8) {
-                .startpos = 0,
-                .endpos = 0,
-                .data = buf
-            },
-            .size = BSIZ,
-            .needs_freeing = true
-        },
+        .buffer = Buffer_from_buf(true,
+                                  buf,
+                                  BSIZ),
         .is_closed = false,
         .has_path = true,
         .maybe_path_or_name = path,
