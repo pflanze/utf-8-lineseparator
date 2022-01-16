@@ -86,12 +86,12 @@ String /* owned by receiver */ bufferedstream_name_sh(BufferedStream *s) {
 
 
 UNUSED static
-BufferedStream buffer_to_BufferedStream(Buffer s /* owned */,
+BufferedStream buffer_to_BufferedStream(Buffer b /* owned */,
                                         uint8_t direction,
                                         String name /* owned */) {
     assert_direction(direction);
-    buffer_assert(&s);
-    if ((direction & STREAM_DIRECTION_OUT) && s.size == 0) {
+    buffer_assert(&b);
+    if ((direction & STREAM_DIRECTION_OUT) && b.size == 0) {
         /* return Error(Unit, String_literal( */
         /*                  "can't use buffer of size 0 for writing")); */
         // Treat this as a bug, to keep the return type non-Result, hmm?
@@ -99,7 +99,7 @@ BufferedStream buffer_to_BufferedStream(Buffer s /* owned */,
     }
 
     return (BufferedStream) {
-        .buffer = s,
+        .buffer = b,
         .is_closed = false,
         .has_path = false,
         .maybe_path_or_name = name,
