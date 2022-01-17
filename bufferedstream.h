@@ -213,6 +213,58 @@ void bufferedstream_free(BufferedStream *s) {
 }
 
 static
+Result_Unit _bufferedstream_filestream_flush_unsafe(BufferedStream *s) {
+    assert(s->buffer.size > 0); // otherwise it would loop endlessly
+    int fd = s->filestream.maybe_fd;
+retry: {
+        int n = write(fd,
+                      slice_start(s->buffer.slice),
+                      slice_length(s->buffer.slice));
+        if (n < 0) {
+            int err = errno;
+            if (err == EINTR) {
+                goto retry;
+            }
+            s->filestream.maybe_failure = strerror_String(err);
+            return Error(Unit, {});
+        } else if (n == slice_length(s->buffer.slice)) {
+            // done
+            s->buffer.slice.startpos = 0;
+            s->buffer.slice.endpos = 0;
+            return Ok(Unit) {} ENDOk;
+        } else {
+            // partial write
+            s->buffer.slice.startpos += n;
+            assert(s->buffer.slice.startpos <=
+                   s->buffer.slice.endpos);
+            goto retry;
+        }
+    }
+}
+
+static
+Result_Unit bufferedstream_flush(BufferedStream *s) {
+    if (s->is_closed) {
+        return Error(Unit, String_literal("stream is closed"));
+    }
+    if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
+        return Ok(Unit) {} ENDOk;
+    }
+    else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
+        assert(s->filestream.maybe_fd != FD_NOTHING);
+        // Turn startpos from putc writing pos into write writing pos
+        // (this is hacky) (it is being turned back to putc writing
+        // pos by _bufferedstream_filestream_flush_unsafe resetting
+        // the slice to positions 0,0):
+        s->buffer.slice.startpos = 0;
+        return _bufferedstream_filestream_flush_unsafe(s);
+    }
+    else {
+        DIE("invalid stream_type");
+    }
+}
+
+static
 Result_Unit bufferedstream_close(BufferedStream *s) {
     if (s->is_closed) {
         return Error(Unit, String_literal("stream is already closed"));
@@ -230,6 +282,10 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
         // whether we already closed the fd, as the same fd could have
         // been re-used in the mean time, but that has been done above
         // via `is_closed` already.)
+        if (s->direction & STREAM_DIRECTION_OUT) {
+            Result_Unit r = bufferedstream_flush(s);
+            PROPAGATE_Result(Unit, r);
+        }
         assert(s->filestream.maybe_fd != FD_NOTHING);
         int fd = s->filestream.maybe_fd;
     retry: 
@@ -325,32 +381,9 @@ Result_Unit bufferedstream_putc(BufferedStream *s, unsigned char c) {
             return Error(Unit, String_literal("out of space"));
         }
         else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
-            assert(s->buffer.size > 0); // otherwise it would loop endlessly
-            // Write out the buffer
-            assert(s->filestream.maybe_fd != FD_NOTHING);
-            int fd = s->filestream.maybe_fd;
-        retry: {
-                int n = write(fd,
-                              slice_start(s->buffer.slice),
-                              slice_length(s->buffer.slice));
-                if (n < 0) {
-                    int err = errno;
-                    if (err == EINTR) {
-                        goto retry;
-                    }
-                    s->filestream.maybe_failure = strerror_String(err);
-                } else if (n == slice_length(s->buffer.slice)) {
-                    // done
-                    s->buffer.slice.startpos = 0;
-                    s->buffer.slice.endpos = 0;
-                } else {
-                    // partial write
-                    s->buffer.slice.startpos += n;
-                    assert(s->buffer.slice.startpos <=
-                           s->buffer.slice.endpos);
-                }
-                return bufferedstream_putc(s, c);
-            }
+            Result_Unit r = bufferedstream_flush(s);
+            PROPAGATE_Result(Unit, r);
+            return bufferedstream_putc(s, c);
         }
         else {
             DIE("invalid stream_type");
