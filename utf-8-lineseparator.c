@@ -146,8 +146,7 @@ int main(int argc, const char**argv) {
         } else if (argc == 2) {
             const char *path = argv[1];
             Result_BufferedStream r_in =
-                open_BufferedStream(String_borrowing(path),
-                                    O_RDONLY);
+                open_r_BufferedStream(String_borrowing(path));
             if (result_is_failure(r_in)) {
                 // XX should this have the path in the message,
                 // already? Should there be a
