@@ -245,7 +245,7 @@ retry: {
 static
 Result_Unit bufferedstream_flush(BufferedStream *s) {
     if (s->is_closed) {
-        return Error(Unit, String_literal("stream is closed"));
+        return Error(Unit, String_literal("flush: stream is closed"));
     }
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
         return Ok(Unit) {} ENDOk;
@@ -267,7 +267,7 @@ Result_Unit bufferedstream_flush(BufferedStream *s) {
 static
 Result_Unit bufferedstream_close(BufferedStream *s) {
     if (s->is_closed) {
-        return Error(Unit, String_literal("stream is already closed"));
+        return Error(Unit, String_literal("close: stream is already closed"));
     }
     BEGINRETURN(Result_Unit);
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
@@ -314,7 +314,7 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
 static
 Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
     if (s->is_closed) {
-        return Error(Maybe_u8, String_literal("stream is closed"));
+        return Error(Maybe_u8, String_literal("getc: stream is closed"));
     }
     if (! (s->direction & STREAM_DIRECTION_IN)) {
         return Error(Maybe_u8, String_literal(
@@ -375,7 +375,7 @@ Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
 static
 Result_Unit bufferedstream_putc(BufferedStream *s, unsigned char c) {
     if (s->is_closed) {
-        return Error(Unit, String_literal("stream is closed"));
+        return Error(Unit, String_literal("putc: stream is closed"));
     }
     if (! (s->direction & STREAM_DIRECTION_OUT)) {
         return Error(Unit, String_literal(
@@ -387,7 +387,7 @@ Result_Unit bufferedstream_putc(BufferedStream *s, unsigned char c) {
     } else {
         if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
             // XX include name in message, right?
-            return Error(Unit, String_literal("out of space"));
+            return Error(Unit, String_literal("putc to buffer: out of space"));
         }
         else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
             Result_Unit r = bufferedstream_flush(s);
