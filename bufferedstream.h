@@ -89,6 +89,7 @@ UNUSED static
 BufferedStream buffer_to_BufferedStream(Buffer b /* owned */,
                                         uint8_t direction,
                                         String name /* owned */) {
+    WARN("buffer_to_BufferedStream");
     assert_direction(direction);
     buffer_assert(&b);
     if ((direction & STREAM_DIRECTION_OUT) && b.size == 0) {
@@ -114,6 +115,7 @@ BufferedStream fd_BufferedStream(int fd,
                                  uint8_t direction,
                                  String maybe_path_or_name /* owned */,
                                  bool is_path) {
+    WARN("fd_BufferedStream");
     assert(fd >= 0);
     assert_direction(direction);
     
@@ -142,6 +144,7 @@ UNUSED static
 Result_BufferedStream open_BufferedStream(String path /* owned */,
                                           int flags,
                                           mode_t mode) {
+    WARN("open_BufferedStream");
     // The flags are 0, 1, 2 on Linux, but ? HACKY.
     const int flags_directions = flags & (O_RDONLY | O_WRONLY | O_RDWR);
     uint8_t direction;
@@ -184,12 +187,14 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
 
 UNUSED static
 Result_BufferedStream open_r_BufferedStream(String path /* owned */) {
+    WARN("open_r_BufferedStream");
     return open_BufferedStream(path, O_RDONLY, 0);
 }
 
 
 static
 void bufferedstream_release(BufferedStream *s) {
+    WARN("bufferedstream_release");
     assert(s->is_closed);
     assert_direction(s->direction); // paranoia (to catch all usage
                                     // patterns)
@@ -208,12 +213,14 @@ void bufferedstream_release(BufferedStream *s) {
 
 UNUSED static
 void bufferedstream_free(BufferedStream *s) {
+    WARN("bufferedstream_free");
     bufferedstream_release(s);
     free(s);
 }
 
 static
 Result_Unit _bufferedstream_filestream_flush_unsafe(BufferedStream *s) {
+    WARN("_bufferedstream_filestream_flush_unsafe");
     assert(s->buffer.size > 0); // otherwise it would loop endlessly
     int fd = s->filestream.maybe_fd;
 retry: {
@@ -244,6 +251,7 @@ retry: {
 
 static
 Result_Unit bufferedstream_flush(BufferedStream *s) {
+    WARN("bufferedstream_flush");
     if (s->is_closed) {
         return Error(Unit, String_literal("flush: stream is closed"));
     }
@@ -266,6 +274,7 @@ Result_Unit bufferedstream_flush(BufferedStream *s) {
 
 static
 Result_Unit bufferedstream_close(BufferedStream *s) {
+    WARN("bufferedstream_close");
     if (s->is_closed) {
         return Error(Unit, String_literal("close: stream is already closed"));
     }
@@ -313,6 +322,7 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
 
 static
 Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
+    WARN("bufferedstream_getc");
     if (s->is_closed) {
         return Error(Maybe_u8, String_literal("getc: stream is closed"));
     }
@@ -374,6 +384,7 @@ Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
 
 static
 Result_Unit bufferedstream_putc(BufferedStream *s, unsigned char c) {
+    WARN("bufferedstream_putc");
     if (s->is_closed) {
         return Error(Unit, String_literal("putc: stream is closed"));
     }
