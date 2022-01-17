@@ -140,7 +140,8 @@ DEFTYPE_Result_(BufferedStream);
 
 UNUSED static
 Result_BufferedStream open_BufferedStream(String path /* owned */,
-                                          int flags) {
+                                          int flags,
+                                          mode_t mode) {
     // The flags are 0, 1, 2 on Linux, but ? HACKY.
     const int flags_directions = flags & (O_RDONLY | O_WRONLY | O_RDWR);
     uint8_t direction;
@@ -156,7 +157,7 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
     
 #define BSIZ 4096
     unsigned char *buf = xmalloc(BSIZ);
-    int fd = open(path.str, flags);
+    int fd = open(path.str, flags, mode);
     if (fd < 0) {
         int err = errno;
         string_release(path);
@@ -179,6 +180,11 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
         }
     } ENDOk;
 #undef BSIZ
+}
+
+UNUSED static
+Result_BufferedStream open_r_BufferedStream(String path /* owned */) {
+    return open_BufferedStream(path, O_RDONLY, 0);
 }
 
 
