@@ -15,8 +15,16 @@ Result_Unit test_bufferedstream_1(TestStatistics *stats) {
     BEGINRETURN(Result_Unit);
 #define TBUFSIZ 90000
     unsigned char buf[TBUFSIZ];
-    for (int i = 0; i < TBUFSIZ; i++) {
-        buf[i] = i;
+    {
+        uint64_t n0, n1;
+        n0 = 1;
+        n1 = 1;
+        for (uint64_t i = 0; i < TBUFSIZ; i++) {
+            uint64_t n = n0 + n1 - (i >> 8);
+            buf[i] = n;
+            n0 = n1;
+            n1 = n;
+        }
     }
 
     Result_BufferedStream rs = open_BufferedStream(
