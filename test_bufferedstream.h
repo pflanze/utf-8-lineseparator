@@ -24,11 +24,11 @@ Result_Unit test_bufferedstream_1(TestStatistics *stats) {
     PROPAGATEL_Result(rs, Unit, rs);
 
     Result_Maybe_u8 rmc0 = bufferedstream_getc(&rs.ok);
+    // getc on write-only file handle must fail:
+    TEST_ASSERT(result_is_failure(rmc0));
     if (result_is_failure(rmc0)) {
         TEST_ASSERT(0 == strcmp(rmc0.failure.str,
                                 "getc: stream was not opened for input"));
-    } else {
-        TEST_FAILURE("getc on write-only file handle did not fail");
     }
     result_release(rmc0);
 
@@ -52,16 +52,20 @@ Result_Unit test_bufferedstream_1(TestStatistics *stats) {
         rmc = bufferedstream_getc(&rs2.ok);
         PROPAGATEL_Result(rmc, Unit, rmc);
         if (rmc.ok.is_nothing) {
-            TEST_FAILURE("bug: file is too short");
+            RETURNL(rmc, Error(Unit, String_literal(
+                                   "bug: file is too short")));
         } else {
-            TEST_ASSERT(rmc.ok.value == buf[i]);
-            // ^ XX that reports tons of success. return on fail!
+            if (! (rmc.ok.value == buf[i])) {
+                RETURNL(rmc, Error(Unit, String_literal(
+                                       "rmc.ok.value == buf[i] failed")));
+            }
         }
     }
     rmc = bufferedstream_getc(&rs2.ok);
     PROPAGATEL_Result(rmc, Unit, rmc);
     if (! rmc.ok.is_nothing) {
-        TEST_FAILURE("bug: file is too long");
+        RETURNL(rmc, Error(Unit, String_literal(
+                               "bug: file is too long")));
     }
 
     Result_Unit ru3 = bufferedstream_close(&rs2.ok);
