@@ -10,7 +10,7 @@ CLANG ?= clang
 COVFLAGS ?= -O0 -fprofile-instr-generate -fcoverage-mapping
 
 
-headers = array.h bufferedstream.h buffer.h env.h io.h leakcheck.h maybe.h mem.h monkey.h monkey-posix.h result.h shorttypenames.h slice.h string.h string_perror.h testinfra.h test_unicode.h unicode.h util.h
+headers = array.h bufferedstream.h buffer.h env.h io.h leakcheck.h maybe.h mem.h monkey.h monkey-posix.h result.h shorttypenames.h slice.h string.h string_perror.h test_bufferedstream.h testinfra.h test_unicode.h unicode.h util.h
 binaries = utf-8-lineseparator utf-8-lineseparator.san utf-8-lineseparator.afl utf-8-lineseparator.aflsan utf-8-lineseparator.cov utf-8-lineseparator.aflcov test test.san
 
 

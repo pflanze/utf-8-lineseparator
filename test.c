@@ -9,12 +9,14 @@
 
 #include "testinfra.h"
 #include "test_unicode.h"
+#include "test_bufferedstream.h"
 
 
 int main() {
     TestStatistics stats = {};
 
     test_unicode(&stats);
+    test_bufferedstream(&stats);
 
     teststatistics_print(&stats);
     leakcheck_verify(false);
