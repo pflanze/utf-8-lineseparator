@@ -32,16 +32,18 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
     if (rmc.ok.is_nothing) {
         RETURNL(_rmc, Error(u32, String_literal("premature EOF")));
     }
-    Result_Maybe_u32 rmc2 = get_unicodechar(&in);
-    PROPAGATEL_Result(_rmc2, u32, rmc2);
-    if (! rmc2.ok.is_nothing) {
-        RETURNL(_rmc2, Error(u32, String_literal(
-                                 "left-over data after character")));
-    }
+    {
+        Result_Maybe_u32 rmc2 = get_unicodechar(&in);
+        PROPAGATEL_Result(_rmc2, u32, rmc2);
+        if (! rmc2.ok.is_nothing) {
+            RETURNL(_rmc2, Error(u32, String_literal(
+                                     "left-over data after character")));
+        }
 
-    RETURN(Ok(u32) rmc.ok.value ENDOk);
-_rmc2:
-    result_release(rmc2);
+        RETURN(Ok(u32) rmc.ok.value ENDOk);
+    _rmc2:
+        result_release(rmc2);
+    }
 _rmc:
     result_release(rmc);
     bufferedstream_close(&in);
