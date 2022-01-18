@@ -313,11 +313,14 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
 
 static
 Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
-    assert(s->direction & STREAM_DIRECTION_IN);
-
     if (s->is_closed) {
         return Error(Maybe_u8, String_literal("stream is closed"));
     }
+    if (! (s->direction & STREAM_DIRECTION_IN)) {
+        return Error(Maybe_u8, String_literal(
+                         "getc: stream was not opened for input"));
+    }
+    
     Maybe_u8 c = buffer_getc(&s->buffer);
     if (maybe_is_just(c)) {
         return Ok(Maybe_u8) c ENDOk;
@@ -371,11 +374,14 @@ Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
 
 static
 Result_Unit bufferedstream_putc(BufferedStream *s, unsigned char c) {
-    assert(s->direction & STREAM_DIRECTION_OUT);
-
     if (s->is_closed) {
         return Error(Unit, String_literal("stream is closed"));
     }
+    if (! (s->direction & STREAM_DIRECTION_OUT)) {
+        return Error(Unit, String_literal(
+                         "getc: stream was not opened for output"));
+    }
+
     if (buffer_putc(&s->buffer, c)) {
         return Ok(Unit) {} ENDOk;
     } else {
