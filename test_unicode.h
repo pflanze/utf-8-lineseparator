@@ -112,11 +112,14 @@ void test_unicode(TestStatistics *stats) {
             FOR_RANGE (i2, 0, 256) {
                 FOR_RANGE (i1, 0, 256) {
                     FOR_RANGE (i0, 0, 256) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnarrowing"
                         const unsigned char buf[] = { i0, i1, i2, i3 };
                         Result_u32 rc = buf_to_utf8_codepoint(
                             buf, sizeof(buf));
                         // if (result_is_success(rc)) ...
                         result_release(rc);
+#pragma GCC diagnostic pop
                     }
                 }
             }
