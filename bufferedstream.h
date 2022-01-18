@@ -27,6 +27,9 @@
 #include "monkey.h"
 
 
+const size_t bufferedstream_buffersize = 4096*4;
+
+
 typedef struct { } Unit;
 #define default_Unit {}
 
@@ -117,11 +120,10 @@ BufferedStream fd_BufferedStream(int fd,
     assert(fd >= 0);
     assert_direction(direction);
     
-#define BSIZ 4096
     return (BufferedStream) {
         .buffer = Buffer_from_buf(true,
-                                  xmalloc(BSIZ),
-                                  BSIZ),
+                                  xmalloc(bufferedstream_buffersize),
+                                  bufferedstream_buffersize),
         .is_closed = false,
         .has_path = is_path,
         .maybe_path_or_name = maybe_path_or_name,
@@ -133,7 +135,6 @@ BufferedStream fd_BufferedStream(int fd,
             .maybe_failure = noString
         }
     };
-#undef BSIZ
 }
 
 DEFTYPE_Result_(BufferedStream);
@@ -155,8 +156,7 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
         DIE("invalid flags");
     }
     
-#define BSIZ 4096
-    unsigned char *buf = xmalloc(BSIZ);
+    unsigned char *buf = xmalloc(bufferedstream_buffersize);
     int fd = open(path.str, flags, mode);
     if (fd < 0) {
         int err = errno;
@@ -167,7 +167,7 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
     return Ok(BufferedStream) (BufferedStream) {
         .buffer = Buffer_from_buf(true,
                                   buf,
-                                  BSIZ),
+                                  bufferedstream_buffersize),
         .is_closed = false,
         .has_path = true,
         .maybe_path_or_name = path,
@@ -179,7 +179,6 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
             .maybe_failure = noString
         }
     } ENDOk;
-#undef BSIZ
 }
 
 UNUSED static
