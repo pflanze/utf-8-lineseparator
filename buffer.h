@@ -11,52 +11,54 @@
 
 #include "shorttypenames.h"
 #include "maybe.h"
+#include "slice.h"
 
 
 DEFTYPE_Maybe_(u8);
 #define default_Maybe_u8 {}
 
+DEFTYPE_Slice_(u8);
+
+
 typedef struct {
-    size_t length;
-    size_t pos;
-    /* const */ size_t size;
-    unsigned char *array;
-    bool needs_freeing;
+    // slightly mis-using Slice here
+    Slice_u8 slice; // the unused (read or unwritten) data
+    /* const */ size_t size; // the size of the data in slice
+    bool needs_freeing; // whether the data in slice needs to be freed
 } Buffer;
 
 static
 void buffer_assert(Buffer *s) {
-    assert(s->size >= s->length);
-    assert(s->length >= s->pos);
-    assert(s->array);
+    assert(s->slice.endpos <= s->size);
+    assert(s->slice.startpos <= s->slice.endpos);
+    assert(s->slice.data);
 }
 
 static
 void buffer_release(Buffer *b) {
-    if (b->needs_freeing) free(b->array);
-    b->array = NULL;
+    if (b->needs_freeing) free(b->slice.data);
 }
 
 static
 Maybe_u8 buffer_getc(Buffer *b) {
-    if (b->pos < b->length) {
-        return Just(u8) b->array[b->pos++] ENDJust;
-    } else {
+    if (slice_is_empty(b->slice)) {
         return Nothing(u8);
+    } else {
+        return Just(u8) slice_get_unsafe(b->slice) ENDJust;
     }
 }
 
 // Returns true if done, false if buffer is full.
 static
 bool buffer_putc(Buffer *b, unsigned char c) {
-    size_t newpos = b->pos + 1;
-    if (newpos < b->size) {
-        b->array[newpos] = c;
-        b->pos = newpos;
+    size_t startpos = b->slice.startpos;
+    if (startpos < b->size) {
+        b->slice.data[startpos] = c;
+        size_t newpos = b->slice.startpos + 1;
+        b->slice.startpos = newpos;
         // XX is this bad design? Have 2 kinds of buffers, or?:
-        size_t newminlen = newpos + 1;
-        if (b->length < newminlen) {
-            b->length = newminlen;
+        if (b->slice.endpos < newpos) {
+            b->slice.endpos = newpos;
         }
         return true;
     } else {
