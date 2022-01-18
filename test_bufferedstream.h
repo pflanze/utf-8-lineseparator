@@ -13,7 +13,7 @@
 static
 Result_Unit test_bufferedstream_1(TestStatistics *stats) {
     BEGINRETURN(Result_Unit);
-#define TBUFSIZ 9000
+#define TBUFSIZ 90000
     unsigned char buf[TBUFSIZ];
     for (int i = 0; i < TBUFSIZ; i++) {
         buf[i] = i;
