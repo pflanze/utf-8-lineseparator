@@ -20,7 +20,7 @@ Result_Unit test_bufferedstream_1(TestStatistics *stats) {
     }
 
     Result_BufferedStream rs = open_BufferedStream(
-        String_literal(".test.out"), O_WRONLY | O_CREAT, 0666);
+        String_literal(".test.out"), O_WRONLY | O_CREAT | O_TRUNC, 0666);
     PROPAGATEL_Result(rs, Unit, rs);
 
     Result_Maybe_u8 rmc0 = bufferedstream_getc(&rs.ok);
