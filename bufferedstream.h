@@ -121,9 +121,10 @@ BufferedStream fd_BufferedStream(int fd,
     assert_direction(direction);
     
     return (BufferedStream) {
-        .buffer = Buffer_from_buf(true,
-                                  xmalloc(bufferedstream_buffersize),
-                                  bufferedstream_buffersize),
+        .buffer = Buffer_from_buf(
+            true,
+            (unsigned char *)xmalloc(bufferedstream_buffersize),
+            bufferedstream_buffersize),
         .is_closed = false,
         .has_path = is_path,
         .maybe_path_or_name = maybe_path_or_name,
@@ -156,7 +157,7 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
         DIE("invalid flags");
     }
     
-    unsigned char *buf = xmalloc(bufferedstream_buffersize);
+    unsigned char *buf = (unsigned char *)xmalloc(bufferedstream_buffersize);
     int fd = open(path.str, flags, mode);
     if (fd < 0) {
         int err = errno;
@@ -226,7 +227,7 @@ retry: {
             }
             s->filestream.maybe_failure = strerror_String(err);
             return Error(Unit, {});
-        } else if (n == slice_length(s->buffer.slice)) {
+        } else if ((size_t)n == slice_length(s->buffer.slice)) {
             // done
             s->buffer.slice.startpos = 0;
             s->buffer.slice.endpos = 0;
