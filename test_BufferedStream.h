@@ -28,7 +28,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
     }
 
     Result_BufferedStream rs = open_BufferedStream(
-        String_literal(".test.out"), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        literal_String(".test.out"), O_WRONLY | O_CREAT | O_TRUNC, 0666);
     PROPAGATEL_Result(rs, Unit, rs);
 
     {
@@ -57,7 +57,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
 
             {
                 Result_BufferedStream rs2 = open_r_BufferedStream(
-                    String_literal(".test.out"));
+                    literal_String(".test.out"));
                 PROPAGATEL_Result(rs2, Unit, rs2);
 
                 Result_Maybe_u8 rmc;
@@ -65,11 +65,11 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                     rmc = BufferedStream_getc(&rs2.ok);
                     PROPAGATEL_Result(rmc, Unit, rmc);
                     if (rmc.ok.is_nothing) {
-                        RETURNL(rmc, Error(Unit, String_literal(
+                        RETURNL(rmc, Error(Unit, literal_String(
                                                "bug: file is too short")));
                     } else {
                         if (! (rmc.ok.value == buf[i])) {
-                            RETURNL(rmc, Error(Unit, String_literal(
+                            RETURNL(rmc, Error(Unit, literal_String(
                                                    "rmc.ok.value == buf[i] failed")));
                         }
                     }
@@ -77,7 +77,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                 rmc = BufferedStream_getc(&rs2.ok);
                 PROPAGATEL_Result(rmc, Unit, rmc);
                 if (! rmc.ok.is_nothing) {
-                    RETURNL(rmc, Error(Unit, String_literal(
+                    RETURNL(rmc, Error(Unit, literal_String(
                                            "bug: file is too long")));
                 }
 

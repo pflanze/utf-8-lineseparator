@@ -14,7 +14,7 @@ String strerror_String(int err) {
 #define EBUFSIZ 256
     char msg[EBUFSIZ];
     strerror_r(err, msg, EBUFSIZ);
-    return String_copy(msg);
+    return copy_String(msg);
 #undef EBUFSIZ
 }
 

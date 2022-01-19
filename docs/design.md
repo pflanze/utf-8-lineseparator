@@ -145,7 +145,7 @@ representing a string constant:
 
 There's a macro to write this in a shorter, more expressive way:
 
-    String_literal("some constant string")
+    literal_String("some constant string")
 
 #### Ownership handling, work in progress
 

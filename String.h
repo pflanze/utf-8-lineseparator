@@ -17,13 +17,13 @@ typedef struct {
 
 #define noString (String) { false, NULL }
 
-#define String_literal(literal)                 \
+#define literal_String(literal)                 \
     (String) { false, "" literal }
-#define String_borrowing(v)                     \
+#define borrowing_String(v)                     \
     (String) { false, (v) }
-#define String_allocated(v)                     \
+#define allocated_String(v)                     \
     (String) { true, (v) }
-#define String_copy(v)                          \
+#define copy_String(v)                          \
     (String) { true, xstrdup(v) }
 
 static
@@ -68,7 +68,7 @@ push_error:
     out[out_i++] = '.';
 finish:
     out[out_i++] = '\0';
-    return String_copy(out);
+    return copy_String(out);
 #undef QBUFSIZ
 }
 

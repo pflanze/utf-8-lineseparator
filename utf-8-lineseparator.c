@@ -108,7 +108,7 @@ int main(int argc, const char**argv) {
                                   bufrest,
                                   len),
                 STREAM_DIRECTION_IN,
-                String_literal("AFL buffer"));
+                literal_String("AFL buffer"));
 
             int res = report(&in);
             fprintf(stderr, "report returned with exit code %i\n", res);
@@ -127,7 +127,7 @@ int main(int argc, const char**argv) {
             BufferedStream in =
                 fd_BufferedStream(0,
                                   STREAM_DIRECTION_IN,
-                                  String_literal("STDIN"),
+                                  literal_String("STDIN"),
                                   false);
             int res = report(&in);
             Result_Unit r = BufferedStream_close(&in);
@@ -146,7 +146,7 @@ int main(int argc, const char**argv) {
         } else if (argc == 2) {
             const char *path = argv[1];
             Result_BufferedStream r_in =
-                open_r_BufferedStream(String_borrowing(path));
+                open_r_BufferedStream(borrowing_String(path));
             if (Result_is_failure(r_in)) {
                 // XX should this have the path in the message,
                 // already? Should there be a

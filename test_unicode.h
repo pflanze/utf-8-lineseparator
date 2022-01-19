@@ -26,17 +26,17 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
         Buffer_from_array(false, (unsigned char*)inbuf, inlen),
         //                       ^ XX provide ConstBuffer instead?
         STREAM_DIRECTION_IN,
-        String_literal("buf"));
+        literal_String("buf"));
     Result_Maybe_u32 rmc = get_unicodechar(&in);
     PROPAGATEL_Result(_rmc, u32, rmc);
     if (rmc.ok.is_nothing) {
-        RETURNL(_rmc, Error(u32, String_literal("premature EOF")));
+        RETURNL(_rmc, Error(u32, literal_String("premature EOF")));
     }
     {
         Result_Maybe_u32 rmc2 = get_unicodechar(&in);
         PROPAGATEL_Result(_rmc2, u32, rmc2);
         if (! rmc2.ok.is_nothing) {
-            RETURNL(_rmc2, Error(u32, String_literal(
+            RETURNL(_rmc2, Error(u32, literal_String(
                                      "left-over data after character")));
         }
 
