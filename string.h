@@ -27,7 +27,7 @@ typedef struct {
     (String) { true, xstrdup(v) }
 
 static
-void string_release(String s) {
+void String_release(String s) {
     if (s.needs_freeing) {
         free((void*)s.str);
     }
@@ -35,7 +35,7 @@ void string_release(String s) {
 
 
 static
-String string_quote_sh(const char *str) {
+String String_quote_sh(const char *str) {
 #define QBUFSIZ 1024
     char out[QBUFSIZ];
     int out_i = 0;

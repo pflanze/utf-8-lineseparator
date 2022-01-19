@@ -19,15 +19,15 @@
 
 #include "io.h"
 #include "shorttypenames.h"
-#include "maybe.h"
-#include "result.h"
-#include "buffer.h"
+#include "Maybe.h"
+#include "Result.h"
+#include "Buffer.h"
 #include "util.h"
 
 #include "monkey.h"
 
 
-const size_t bufferedstream_buffersize = 4096*4;
+const size_t BufferedStream_buffersize = 4096*4;
 
 
 typedef struct { } Unit;
@@ -78,10 +78,10 @@ typedef struct {
 #define default_BufferedStream (BufferedStream){}
 
 UNUSED static
-String /* owned by receiver */ bufferedstream_name_sh(BufferedStream *s) {
+String /* owned by receiver */ BufferedStream_name_sh(BufferedStream *s) {
     assert(s->maybe_path_or_name.str);
     if (s->has_path) {
-        return string_quote_sh(s->maybe_path_or_name.str);
+        return String_quote_sh(s->maybe_path_or_name.str);
     } else {
         return String_copy(s->maybe_path_or_name.str);
     }
@@ -89,11 +89,11 @@ String /* owned by receiver */ bufferedstream_name_sh(BufferedStream *s) {
 
 
 UNUSED static
-BufferedStream buffer_to_BufferedStream(Buffer b /* owned */,
+BufferedStream Buffer_to_BufferedStream(Buffer b /* owned */,
                                         uint8_t direction,
                                         String name /* owned */) {
     assert_direction(direction);
-    buffer_assert(&b);
+    Buffer_assert(&b);
     if ((direction & STREAM_DIRECTION_OUT) && b.size == 0) {
         /* return Error(Unit, String_literal( */
         /*                  "can't use buffer of size 0 for writing")); */
@@ -123,8 +123,8 @@ BufferedStream fd_BufferedStream(int fd,
     return (BufferedStream) {
         .buffer = Buffer_from_buf(
             true,
-            (unsigned char *)xmalloc(bufferedstream_buffersize),
-            bufferedstream_buffersize),
+            (unsigned char *)xmalloc(BufferedStream_buffersize),
+            BufferedStream_buffersize),
         .is_closed = false,
         .has_path = is_path,
         .maybe_path_or_name = maybe_path_or_name,
@@ -157,18 +157,18 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
         DIE("invalid flags");
     }
     
-    unsigned char *buf = (unsigned char *)xmalloc(bufferedstream_buffersize);
+    unsigned char *buf = (unsigned char *)xmalloc(BufferedStream_buffersize);
     int fd = open(path.str, flags, mode);
     if (fd < 0) {
         int err = errno;
-        string_release(path);
+        String_release(path);
         free(buf);
         return Error(BufferedStream, strerror_String(err));
     }
     return Ok(BufferedStream) (BufferedStream) {
         .buffer = Buffer_from_buf(true,
                                   buf,
-                                  bufferedstream_buffersize),
+                                  BufferedStream_buffersize),
         .is_closed = false,
         .has_path = true,
         .maybe_path_or_name = path,
@@ -189,17 +189,17 @@ Result_BufferedStream open_r_BufferedStream(String path /* owned */) {
 
 
 static
-void bufferedstream_release(BufferedStream *s) {
+void BufferedStream_release(BufferedStream *s) {
     assert(s->is_closed);
     assert_direction(s->direction); // paranoia (to catch all usage
                                     // patterns)
 
-    buffer_release(&s->buffer);
+    Buffer_release(&s->buffer);
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
         // nothing
     }
     else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
-        string_release(s->filestream.maybe_failure);
+        String_release(s->filestream.maybe_failure);
     }
     else {
         DIE("invalid stream_type");
@@ -207,19 +207,19 @@ void bufferedstream_release(BufferedStream *s) {
 }
 
 UNUSED static
-void bufferedstream_free(BufferedStream *s) {
-    bufferedstream_release(s);
+void BufferedStream_free(BufferedStream *s) {
+    BufferedStream_release(s);
     free(s);
 }
 
 static
-Result_Unit _bufferedstream_filestream_flush_unsafe(BufferedStream *s) {
+Result_Unit _BufferedStream_filestream_flush_unsafe(BufferedStream *s) {
     assert(s->buffer.size > 0); // otherwise it would loop endlessly
     int fd = s->filestream.maybe_fd;
 retry: {
         int n = write(fd,
-                      slice_start(s->buffer.slice),
-                      slice_length(s->buffer.slice));
+                      Slice_start(s->buffer.slice),
+                      Slice_length(s->buffer.slice));
         if (n < 0) {
             int err = errno;
             if (err == EINTR) {
@@ -227,7 +227,7 @@ retry: {
             }
             s->filestream.maybe_failure = strerror_String(err);
             return Error(Unit, {});
-        } else if ((size_t)n == slice_length(s->buffer.slice)) {
+        } else if ((size_t)n == Slice_length(s->buffer.slice)) {
             // done
             s->buffer.slice.startpos = 0;
             s->buffer.slice.endpos = 0;
@@ -243,7 +243,7 @@ retry: {
 }
 
 static
-Result_Unit bufferedstream_flush(BufferedStream *s) {
+Result_Unit BufferedStream_flush(BufferedStream *s) {
     if (s->is_closed) {
         return Error(Unit, String_literal("flush: stream is closed"));
     }
@@ -254,10 +254,10 @@ Result_Unit bufferedstream_flush(BufferedStream *s) {
         assert(s->filestream.maybe_fd != FD_NOTHING);
         // Turn startpos from putc writing pos into write writing pos
         // (this is hacky) (it is being turned back to putc writing
-        // pos by _bufferedstream_filestream_flush_unsafe resetting
+        // pos by _BufferedStream_filestream_flush_unsafe resetting
         // the slice to positions 0,0):
         s->buffer.slice.startpos = 0;
-        return _bufferedstream_filestream_flush_unsafe(s);
+        return _BufferedStream_filestream_flush_unsafe(s);
     }
     else {
         DIE("invalid stream_type");
@@ -265,7 +265,7 @@ Result_Unit bufferedstream_flush(BufferedStream *s) {
 }
 
 static
-Result_Unit bufferedstream_close(BufferedStream *s) {
+Result_Unit BufferedStream_close(BufferedStream *s) {
     if (s->is_closed) {
         return Error(Unit, String_literal("close: stream is already closed"));
     }
@@ -280,7 +280,7 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
         // been re-used in the mean time, but that has been done above
         // via `is_closed` already.)
         if (s->direction & STREAM_DIRECTION_OUT) {
-            Result_Unit r = bufferedstream_flush(s);
+            Result_Unit r = BufferedStream_flush(s);
             PROPAGATE_Result(Unit, r);
         }
         assert(s->filestream.maybe_fd != FD_NOTHING);
@@ -312,7 +312,7 @@ Result_Unit bufferedstream_close(BufferedStream *s) {
 }
 
 static
-Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
+Result_Maybe_u8 BufferedStream_getc(BufferedStream *s) {
     if (s->is_closed) {
         return Error(Maybe_u8, String_literal("getc: stream is closed"));
     }
@@ -321,8 +321,8 @@ Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
                          "getc: stream was not opened for input"));
     }
     
-    Maybe_u8 c = buffer_getc(&s->buffer);
-    if (maybe_is_just(c)) {
+    Maybe_u8 c = Buffer_getc(&s->buffer);
+    if (Maybe_is_just(c)) {
         return Ok(Maybe_u8) c ENDOk;
     } else {
         if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
@@ -362,7 +362,7 @@ Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
                         s->buffer.slice.startpos = 0;
                         s->buffer.slice.endpos = n;
                     }
-                    return bufferedstream_getc(s);
+                    return BufferedStream_getc(s);
                 }
             }
         }
@@ -373,7 +373,7 @@ Result_Maybe_u8 bufferedstream_getc(BufferedStream *s) {
 }
 
 static
-Result_Unit bufferedstream_putc(BufferedStream *s, unsigned char c) {
+Result_Unit BufferedStream_putc(BufferedStream *s, unsigned char c) {
     if (s->is_closed) {
         return Error(Unit, String_literal("putc: stream is closed"));
     }
@@ -382,7 +382,7 @@ Result_Unit bufferedstream_putc(BufferedStream *s, unsigned char c) {
                          "getc: stream was not opened for output"));
     }
 
-    if (buffer_putc(&s->buffer, c)) {
+    if (Buffer_putc(&s->buffer, c)) {
         return Ok(Unit) {} ENDOk;
     } else {
         if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
@@ -390,9 +390,9 @@ Result_Unit bufferedstream_putc(BufferedStream *s, unsigned char c) {
             return Error(Unit, String_literal("putc to buffer: out of space"));
         }
         else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
-            Result_Unit r = bufferedstream_flush(s);
+            Result_Unit r = BufferedStream_flush(s);
             PROPAGATE_Result(Unit, r);
-            return bufferedstream_putc(s, c);
+            return BufferedStream_putc(s, c);
         }
         else {
             DIE("invalid stream_type");

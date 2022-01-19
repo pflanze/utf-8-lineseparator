@@ -17,13 +17,13 @@ typedef struct {
 
 
 static
-void teststatistics_print(TestStatistics *stats) {
+void TestStatistics_print(TestStatistics *stats) {
     printf("test results: %i success(es), %i failure(s), %i error(s)\n",
            stats->successes, stats->failures, stats->errors);
 }
 
 static
-int teststatistics_issues(TestStatistics *stats) {
+int TestStatistics_issues(TestStatistics *stats) {
     return stats->failures + stats->errors;
 }
 

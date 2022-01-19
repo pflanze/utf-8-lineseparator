@@ -7,11 +7,11 @@
 #define TEST_BUFFEREDSTREAM_H_
 
 #include "testinfra.h"
-#include "bufferedstream.h"
+#include "BufferedStream.h"
 
 
 static
-Result_Unit test_bufferedstream_1(TestStatistics *stats) {
+Result_Unit test_BufferedStream_1(TestStatistics *stats) {
     BEGINRETURN(Result_Unit);
 #define TBUFSIZ 90000
     unsigned char buf[TBUFSIZ];
@@ -32,25 +32,25 @@ Result_Unit test_bufferedstream_1(TestStatistics *stats) {
     PROPAGATEL_Result(rs, Unit, rs);
 
     {
-        Result_Maybe_u8 rmc0 = bufferedstream_getc(&rs.ok);
+        Result_Maybe_u8 rmc0 = BufferedStream_getc(&rs.ok);
         // getc on write-only file handle must fail:
-        TEST_ASSERT(result_is_failure(rmc0));
-        if (result_is_failure(rmc0)) {
+        TEST_ASSERT(Result_is_failure(rmc0));
+        if (Result_is_failure(rmc0)) {
             TEST_ASSERT(0 == strcmp(rmc0.failure.str,
                                     "getc: stream was not opened for input"));
         }
-        result_release(rmc0);
+        Result_release(rmc0);
     }
 
     {
         Result_Unit ru;
         for (int i = 0; i < TBUFSIZ; i++) {
-            ru = bufferedstream_putc(&rs.ok, buf[i]);
+            ru = BufferedStream_putc(&rs.ok, buf[i]);
             PROPAGATEL_Result(ru, Unit, ru);
         }
 
         {
-            Result_Unit ru2 = bufferedstream_close(&rs.ok);
+            Result_Unit ru2 = BufferedStream_close(&rs.ok);
             PROPAGATEL_Result(ru2, Unit, ru2);
 
             // Now read back and compare:
@@ -62,7 +62,7 @@ Result_Unit test_bufferedstream_1(TestStatistics *stats) {
 
                 Result_Maybe_u8 rmc;
                 for (int i = 0; i < TBUFSIZ; i++) {
-                    rmc = bufferedstream_getc(&rs2.ok);
+                    rmc = BufferedStream_getc(&rs2.ok);
                     PROPAGATEL_Result(rmc, Unit, rmc);
                     if (rmc.ok.is_nothing) {
                         RETURNL(rmc, Error(Unit, String_literal(
@@ -74,7 +74,7 @@ Result_Unit test_bufferedstream_1(TestStatistics *stats) {
                         }
                     }
                 }
-                rmc = bufferedstream_getc(&rs2.ok);
+                rmc = BufferedStream_getc(&rs2.ok);
                 PROPAGATEL_Result(rmc, Unit, rmc);
                 if (! rmc.ok.is_nothing) {
                     RETURNL(rmc, Error(Unit, String_literal(
@@ -82,48 +82,48 @@ Result_Unit test_bufferedstream_1(TestStatistics *stats) {
                 }
 
                 {
-                    Result_Unit ru3 = bufferedstream_close(&rs2.ok);
+                    Result_Unit ru3 = BufferedStream_close(&rs2.ok);
                     PROPAGATEL_Result(ru3, Unit, ru3);
 
                     RETURN(Ok(Unit) {} ENDOk);
                 ru3:
-                    result_release(ru3);
+                    Result_release(ru3);
                 }
             rmc:
-                result_release(rmc);
-                bufferedstream_close(&rs2.ok);
-                bufferedstream_release(&rs2.ok);
+                Result_release(rmc);
+                BufferedStream_close(&rs2.ok);
+                BufferedStream_release(&rs2.ok);
             rs2:
-                result_release(rs2);
+                Result_release(rs2);
             }
         ru2:
-            result_release(ru2);
+            Result_release(ru2);
         }
     ru:
-        result_release(ru);
+        Result_release(ru);
     }
 rs:
-    bufferedstream_close(&rs.ok); // no need to check the result here
-    bufferedstream_release(&rs.ok);
-    result_release(rs);
+    BufferedStream_close(&rs.ok); // no need to check the result here
+    BufferedStream_release(&rs.ok);
+    Result_release(rs);
     ENDRETURN;
 }
 
 
 #define CHECK(e)                                        \
     r = e;                                              \
-    if (result_is_failure(r)) {                         \
+    if (Result_is_failure(r)) {                         \
         TEST_FAILURE_("%s", r.failure.str);             \
-        result_release(r);                              \
+        Result_release(r);                              \
     }
 
 
 static
-void test_bufferedstream(TestStatistics *stats) {
+void test_BufferedStream(TestStatistics *stats) {
 
     Result_Unit r;
 
-    CHECK(test_bufferedstream_1(stats));
+    CHECK(test_BufferedStream_1(stats));
 }
 
 #endif /* TEST_BUFFEREDSTREAM_H_ */

@@ -6,7 +6,7 @@
 #ifndef RESULT_H_
 #define RESULT_H_
 
-#include "string.h"
+#include "String.h"
 
 
 #define DEFTYPE_Result_(T)                      \
@@ -21,16 +21,16 @@
     (Result_##T) { noString, (T)
 #define ENDOk }
 
-#define result_is_success(v) (!((v).failure.str))
-#define result_is_failure(v) (!!((v).failure.str))
-// #define result_failure_str(v) ((v).failure.str)
-#define result_release(v)                       \
-    string_release((v).failure)
-#define result_print_failure(fmt, v)            \
+#define Result_is_success(v) (!((v).failure.str))
+#define Result_is_failure(v) (!!((v).failure.str))
+// #define Result_failure_str(v) ((v).failure.str)
+#define Result_release(v)                       \
+    String_release((v).failure)
+#define Result_print_failure(fmt, v)            \
     fprintf(stderr, fmt, (v).failure.str)
 
 #define PROPAGATE_Result(T, r)                                          \
-    if (result_is_failure(r)) {                                         \
+    if (Result_is_failure(r)) {                                         \
         /* (r).failure.needs_freeing = false;                           \
            after the next line, but usually deallocated anyway */       \
         return (Result_##T) { (r).failure, default_##T };               \
@@ -48,7 +48,7 @@
         PROPAGATEL_Result(l2, Sometype, x);
         RETURN(val2);
      l2:
-        result_release(x);
+        Result_release(x);
      l1:
         cleanup1();
         ENDRETURN;
@@ -66,7 +66,7 @@
     return __return;
 
 #define PROPAGATEL_Result(label, T, r)                                  \
-    if (result_is_failure(r)) {                                         \
+    if (Result_is_failure(r)) {                                         \
         __return = (Result_##T) { (r).failure, default_##T };           \
         (r).failure.needs_freeing = false;                              \
         goto label;                                                     \

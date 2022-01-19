@@ -8,10 +8,10 @@
 
 #include "testinfra.h"
 #include "unicode.h"
-#include "result.h"
+#include "Result.h"
 #include "env.h"
-#include "buffer.h"
-#include "bufferedstream.h"
+#include "Buffer.h"
+#include "BufferedStream.h"
 
 
 
@@ -22,7 +22,7 @@ static
 Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
                                  size_t inlen) {
     BEGINRETURN(Result_u32);
-    BufferedStream in = buffer_to_BufferedStream(
+    BufferedStream in = Buffer_to_BufferedStream(
         Buffer_from_array(false, (unsigned char*)inbuf, inlen),
         //                       ^ XX provide ConstBuffer instead?
         STREAM_DIRECTION_IN,
@@ -42,12 +42,12 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
 
         RETURN(Ok(u32) rmc.ok.value ENDOk);
     _rmc2:
-        result_release(rmc2);
+        Result_release(rmc2);
     }
 _rmc:
-    result_release(rmc);
-    bufferedstream_close(&in);
-    bufferedstream_release(&in);
+    Result_release(rmc);
+    BufferedStream_close(&in);
+    BufferedStream_release(&in);
     ENDRETURN;
 }
 
@@ -60,7 +60,7 @@ void t_utf8_equal_codepoint(u32 codepoint,
                             TestStatistics *stats) {
     Result_u32 rc =
         buf_to_utf8_codepoint(buf, buflen);
-    if (result_is_failure(rc)) {
+    if (Result_is_failure(rc)) {
         WARN_("*** Error running test: %s at %s:%i",
               rc.failure.str,
               sourcefile,
@@ -79,7 +79,7 @@ void t_utf8_equal_codepoint(u32 codepoint,
             stats->failures++;
         }
     }
-    result_release(rc);
+    Result_release(rc);
 }
 
 
@@ -119,8 +119,8 @@ void test_unicode(TestStatistics *stats) {
                         const unsigned char buf[] = { i0, i1, i2, i3 };
                         Result_u32 rc = buf_to_utf8_codepoint(
                             buf, sizeof(buf));
-                        // if (result_is_success(rc)) ...
-                        result_release(rc);
+                        // if (Result_is_success(rc)) ...
+                        Result_release(rc);
 #pragma GCC diagnostic pop
                     }
                 }

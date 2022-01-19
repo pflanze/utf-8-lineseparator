@@ -13,10 +13,10 @@
 
 #include "leakcheck.h"
 
-#include "string.h"
+#include "String.h"
 #include "util.h"
 #include "env.h"
-#include "bufferedstream.h"
+#include "BufferedStream.h"
 #include "unicode.h"
 
 
@@ -31,7 +31,7 @@ int report(BufferedStream* in /* borrowed */) {
     bool last_was_CR = false;
     while (1) {
         Result_Maybe_u32 c = get_unicodechar(in);
-        if (result_is_failure(c)) {
+        if (Result_is_failure(c)) {
             int64_t linecount = LFcount + CRcount + CRLFcount;
             const char *questionable =
                 (linecount == MAX3(LFcount, CRcount, CRLFcount)) ? "false" : "true";
@@ -41,7 +41,7 @@ int report(BufferedStream* in /* borrowed */) {
                    linecount + 1,
                    column + 1,
                    questionable);
-            result_release(c);
+            Result_release(c);
             return 0;
         }
         if (c.ok.is_nothing) {
@@ -103,7 +103,7 @@ int main(int argc, const char**argv) {
             monkey_init(buf, MONKEY_INIT_LEN);
             unsigned char *bufrest = buf + MONKEY_INIT_LEN;
 
-            BufferedStream in = buffer_to_BufferedStream(
+            BufferedStream in = Buffer_to_BufferedStream(
                 Buffer_from_array(false,
                                   bufrest,
                                   len),
@@ -112,8 +112,8 @@ int main(int argc, const char**argv) {
 
             int res = report(&in);
             fprintf(stderr, "report returned with exit code %i\n", res);
-            bufferedstream_close(&in);
-            bufferedstream_release(&in);
+            BufferedStream_close(&in);
+            BufferedStream_release(&in);
 
             monkey_release();
 
@@ -130,16 +130,16 @@ int main(int argc, const char**argv) {
                                   String_literal("STDIN"),
                                   false);
             int res = report(&in);
-            Result_Unit r = bufferedstream_close(&in);
-            if (result_is_failure(r)) {
+            Result_Unit r = BufferedStream_close(&in);
+            if (Result_is_failure(r)) {
                 // XX should this have the path in the message,
                 // already? Should there be a
-                // bufferedstream_error_message method?
+                // BufferedStream_error_message method?
                 fprintf(stderr, "close: %s", r.failure.str);
                 res = 1; // OK?
             }
-            result_release(r);
-            bufferedstream_release(&in);
+            Result_release(r);
+            BufferedStream_release(&in);
 
             leakcheck_verify(false);
             return res;
@@ -147,26 +147,26 @@ int main(int argc, const char**argv) {
             const char *path = argv[1];
             Result_BufferedStream r_in =
                 open_r_BufferedStream(String_borrowing(path));
-            if (result_is_failure(r_in)) {
+            if (Result_is_failure(r_in)) {
                 // XX should this have the path in the message,
                 // already? Should there be a
-                // bufferedstream_error_message method?
+                // BufferedStream_error_message method?
                 fprintf(stderr, "open: %s", r_in.failure.str);
-                result_release(r_in);
+                Result_release(r_in);
                 leakcheck_verify(false);
                 return 1;
             }
 
             int res = report(&r_in.ok);
-            Result_Unit r = bufferedstream_close(&r_in.ok);
-            if (result_is_failure(r)) {
+            Result_Unit r = BufferedStream_close(&r_in.ok);
+            if (Result_is_failure(r)) {
                 fprintf(stderr, "close: %s", r.failure.str);
                 res = 1; // OK?
             }
-            result_release(r);
-            bufferedstream_release(&r_in.ok);
-            result_release(r_in);
-            // (XX should result_release magically call release on .ok, too?)
+            Result_release(r);
+            BufferedStream_release(&r_in.ok);
+            Result_release(r_in);
+            // (XX should Result_release magically call release on .ok, too?)
 
             leakcheck_verify(false);
             return res;

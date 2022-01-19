@@ -6,7 +6,7 @@
 #ifndef IO_H_
 #define IO_H_
 
-#include "string.h"
+#include "String.h"
 
 
 static

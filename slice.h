@@ -14,7 +14,7 @@
   A Slice is representing a subsection of an Array, borrowing the
   latter's data.
 
-  See `array_slice_unsafe` and `array_slice_safer` in `array.h`.
+  See `Array_Slice_unsafe` and `Array_Slice_safer` in `Array.h`.
 
  */
 
@@ -25,22 +25,22 @@
         T *data;                                \
     } Slice_##T;
 
-#define slice_length(s)                         \
+#define Slice_length(s)                         \
     ((s).endpos - (s).startpos)
 
-#define slice_start(s)                          \
+#define Slice_start(s)                          \
     (&(s).data[(s).startpos])
 
-#define slice_end(s)                            \
+#define Slice_end(s)                            \
     (&(s).data[(s).endpos])
 
-#define slice_ref_start_unsafe(s)               \
-    (*slice_start(s))
+#define Slice_ref_start_unsafe(s)               \
+    (*Slice_start(s))
 
-#define slice_get_unsafe(s)                     \
+#define Slice_get_unsafe(s)                     \
     (s).data[(s).startpos++]
 
-#define slice_is_empty(s)                       \
+#define Slice_is_empty(s)                       \
     ((s).startpos >= (s).endpos)
 
 

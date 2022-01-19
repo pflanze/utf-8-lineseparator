@@ -10,8 +10,8 @@
 #include <stdbool.h>
 
 #include "shorttypenames.h"
-#include "maybe.h"
-#include "slice.h"
+#include "Maybe.h"
+#include "Slice.h"
 #include "util.h" /* UNUSED */
 
 
@@ -29,7 +29,7 @@ typedef struct {
 } Buffer;
 
 static
-void buffer_assert(Buffer *s) {
+void Buffer_assert(Buffer *s) {
     assert(s->slice.endpos <= s->size);
     assert(s->slice.startpos <= s->slice.endpos);
     assert(s->slice.data);
@@ -65,22 +65,22 @@ Buffer Buffer_from_buf(bool needs_freeing, unsigned char *buf, size_t size) {
 }
 
 static
-void buffer_release(Buffer *b) {
+void Buffer_release(Buffer *b) {
     if (b->needs_freeing) free(b->slice.data);
 }
 
 static
-Maybe_u8 buffer_getc(Buffer *b) {
-    if (slice_is_empty(b->slice)) {
+Maybe_u8 Buffer_getc(Buffer *b) {
+    if (Slice_is_empty(b->slice)) {
         return Nothing(u8);
     } else {
-        return Just(u8) slice_get_unsafe(b->slice) ENDJust;
+        return Just(u8) Slice_get_unsafe(b->slice) ENDJust;
     }
 }
 
 // Returns true if done, false if buffer is full.
 static
-bool buffer_putc(Buffer *b, unsigned char c) {
+bool Buffer_putc(Buffer *b, unsigned char c) {
     size_t startpos = b->slice.startpos;
     if (startpos < b->size) {
         b->slice.data[startpos] = c;

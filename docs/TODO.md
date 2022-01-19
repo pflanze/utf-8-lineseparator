@@ -1,9 +1,9 @@
 # TODO
 
-  * `string_quote_js`, although not writing problematic strings
+  * `String_quote_js`, although not writing problematic strings
     currently
 
-  * output in `bufferedstream.h`
+  * output in `BufferedStream.h`
 
   * UTF-8 encoder
 

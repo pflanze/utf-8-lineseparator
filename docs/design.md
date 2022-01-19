@@ -64,9 +64,9 @@ The other is defining the container for every contained type used.
 This is type and memory safe, but redefining the container type
 manually is getting tedious fast. But C has macros, which this project
 is taking advantage of (the include here is referring to
-[maybe.h](../maybe.h)):
+[Maybe.h](../Maybe.h)):
 
-    #include "maybe.h"
+    #include "Maybe.h"
 
     DEFTYPE_Maybe_(int);
     typedef const char* str;
@@ -103,7 +103,7 @@ whether they actually contain a value.
 
 ### Result
 
-The file [result.h](../result.h)) defines the parametrized Result
+The file [Result.h](../Result.h)) defines the parametrized Result
 type. A Result can contain a value similar to a Maybe, but instead of
 containing nothing in the alternate case, they contain an
 error. Currently this is always simply a string; i.e. whenever a
@@ -133,9 +133,9 @@ statically which case it is dealing with, the strings would either
 knowledge about which case it is dealing with has to be included at
 runtime when passing that string.
 
-The type `String` from [string.h](../string.h) is used for the latter approach.
+The type `String` from [String.h](../String.h) is used for the latter approach.
 The attribute `needs_freeing` embodies the knowledge about which case it
-is representing. The `string_release(String s)` function releases the
+is representing. The `String_release(String s)` function releases the
 memory associated with the string, *iff* needed (i.e. `needs_freeing`
 is true). A `String` is created by simply passing the boolean along
 with the pointer to the array. This would create a `String`
@@ -157,7 +157,7 @@ it is becoming the owner of that string (implying it will have to
 release it when done with it), but the caller of foo wants to continue
 using the string afterwards, it can simply pass a new `String` that
 sets the `needs_freeing` field to `false`. When foo calls
-`string_release`, it will then not actually free it and the caller can
+`String_release`, it will then not actually free it and the caller can
 continue to use it.
 
 (This is not a very solid approach (as foo might assume that it can

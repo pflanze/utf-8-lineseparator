@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "string.h"
+#include "String.h"
 
 
 static
@@ -25,7 +25,7 @@ int perror_str(const char *fmt, const char *arg1) {
 static
 int perror_string(const char *fmt, String str /* taking ownership */) {
     int res = perror_str(fmt, str.str);
-    string_release(str);
+    String_release(str);
     return res;
 }
 

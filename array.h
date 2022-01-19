@@ -17,23 +17,23 @@
     } Array_##T;
 
 
-#define array_release(s)                        \
+#define Array_release(s)                        \
     if ((s).needs_freeing) {                    \
         free((s).data);                         \
     }
 
-#define array_T(s)                              \
+#define Array_T(s)                              \
     __typeof__((s).data[0])
 
-// needs #include "slice.h" and DEFTYPE_Slice_(T)
-#define array_slice_unsafe(T, s, startpos, endpos)      \
+// needs #include "Slice.h" and DEFTYPE_Slice_(T)
+#define Array_Slice_unsafe(T, s, startpos, endpos)      \
     (Slice_##T) {                                       \
         .startpos = startpos,                           \
         .endpos = endpos,                               \
         .data = (s).data                                \
     }
 
-#define array_slice_safer(T, s, startpos, endpos)               \
+#define Array_Slice_safer(T, s, startpos, endpos)               \
     (Slice_##T) {                                               \
         .startpos = (assert(startpos <= (s).length), startpos), \
         .endpos = (assert(endpos <= (s).length), endpos)        \

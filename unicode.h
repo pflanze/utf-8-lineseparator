@@ -8,9 +8,9 @@
 
 
 #include "shorttypenames.h" /* u8 u32 */
-#include "bufferedstream.h"
-#include "result.h"
-#include "maybe.h"
+#include "BufferedStream.h"
+#include "Result.h"
+#include "Maybe.h"
 
 
 DEFTYPE_Maybe_(u32);
@@ -23,7 +23,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
     // https://en.wikipedia.org/wiki/Utf-8#Encoding
 #define EBUFSIZ 256
     u32 codepoint;
-    Result_Maybe_u8 b1 = bufferedstream_getc(in);
+    Result_Maybe_u8 b1 = BufferedStream_getc(in);
     PROPAGATE_Result(Maybe_u32, b1);
     if (b1.ok.is_nothing) {
         return Ok(Maybe_u32) Nothing(u32) ENDOk;
@@ -47,7 +47,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
                              "invalid start byte decoding UTF-8"));
         }
         for (int i = 1; i < numbytes; i++) {
-            Result_Maybe_u8 b = bufferedstream_getc(in);
+            Result_Maybe_u8 b = BufferedStream_getc(in);
             PROPAGATE_Result(Maybe_u32, b);
             if (b.ok.is_nothing) {
                 char msg[EBUFSIZ];
