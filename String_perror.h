@@ -23,7 +23,7 @@ int perror_str(const char *fmt, const char *arg1) {
 }
 
 static
-int perror_string(const char *fmt, String str /* taking ownership */) {
+int perror_String(const char *fmt, String str /* taking ownership */) {
     int res = perror_str(fmt, str.str);
     String_release(str);
     return res;
