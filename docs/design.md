@@ -191,6 +191,53 @@ and `ENDRETURN` needs to put at the end of the function to actually
 `return` the value that `RETURNL` or `RETURN` have stored for the
 return.
 
+## Naming conventions
+
+Composite types (structs) are camel-case and start with an upper-case
+letter, and do not contain an underscore unless it's the result of a
+parameterized type (e.g. something like `Result` should not contain an
+underscore, but `Result_String` does as this is the result of the
+parameterization of `Result` with `String`).
+
+Where type names are used in procedure names, the casing is retained
+(including upper-case first, even if at the beginning of a procedure
+name). Other than type names, procedure names are made of
+all-lowercase characters (and using the underscore for
+separation). There's always a '_' between a type name and the rest of
+the procedure name. A procedure name should always contain at least
+one segment that is not a type name: instead of
+
+    Bar Foo_Bar(Foo s);
+
+this procedure should be named
+
+    Bar Foo_to_Bar(Foo s);
+
+which means that whenever a name contains underscores and any of the
+segments start with a lower-case character, it's clear that it's a
+procedure name (unless the lower-case part is a built-in/primitive
+type name, see below).  (But exceptions could be acceptable as long as
+they can't conflict with a type name, i.e. `Foo` must not be a type
+with a single type parameter here as `Foo_Bar` would then be `Foo`
+parameterized by `Bar`.)
+
+Aliases to built-in types are still all-lowercase (`str`, `u8`
+etc.). These should be few (so that they can be memorized easily) and
+are excluded in the rules about lower-case segments used above.
+
+These rules sound a bit complicated but the reason for them is so that:
+
+ 1. type names can be seen 1:1 (useful to see `Foo_bar` as being the
+    bar method on `Foo`).
+ 1. more importantly, so that procedure names can be constructed in
+    macros that take a type name as a parameter (CPP macros can't
+    lower-case arguments)
+ 1. type names are generated via macros and need to remain
+    unambiguous, too.
+
+(The third reason might become obsolete if moving to use macros to
+parameterize a type on the fly, like `Result(Maybe(u8)) v;` (todo?).)
+
 ## Leakcheck
 
 For precise checking of memory handling errors, the address sanitizer
