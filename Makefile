@@ -1,6 +1,17 @@
 OPT ?= -O2
 SAN ?= -fsanitize=undefined -fsanitize=address -fPIE -fno-omit-frame-pointer
-CFLAGS ?= -Wall -gdwarf-4 -g3 $(OPT) -std=c11 -fdiagnostics-color=always
+
+ifeq ($(CC),g++)
+  STD ?= -std=c++17
+else
+  ifeq ($(CC),clang++)
+    STD ?= -std=c++17
+  else
+    STD ?= -std=c11
+  endif
+endif
+
+CFLAGS ?= -Wall -gdwarf-4 -g3 $(OPT) $(STD) -fdiagnostics-color=always
 compile = $(CC) -DAFL=0 $(CFLAGS)
 AFL_CLANG_FAST ?= afl-clang-fast
 
