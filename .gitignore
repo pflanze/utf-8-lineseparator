@@ -12,3 +12,4 @@ utf-8-lineseparator.aflcov
 *.profraw*
 *.profdata
 .test*.out
+*.E.c

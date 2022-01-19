@@ -80,6 +80,13 @@ check: runtests
 checkgdb: runtestsgdb
 
 
+%.E: %.c
+	$(compile) -E -o $@ $<
+%.E.c: %.E
+	perl -wne 'next if /^# +\d+/; print or die $!' < $< | clang-format > $@
+expand: utf-8-lineseparator.E.c test.E.c
+
+
 clean:
 	rm -f $(binaries) *.profdata
 	rm -rf ./*.profraw/
