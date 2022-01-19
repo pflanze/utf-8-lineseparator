@@ -166,7 +166,6 @@ int main(int argc, const char**argv) {
             Result_release(r);
             BufferedStream_release(&r_in.ok);
             Result_release(r_in);
-            // (XX should Result_release magically call release on .ok, too?)
 
             leakcheck_verify(false);
             return res;

@@ -24,6 +24,9 @@
 #define Result_is_success(v) (!((v).failure.str))
 #define Result_is_failure(v) (!!((v).failure.str))
 // #define Result_failure_str(v) ((v).failure.str)
+
+// We don't release the .ok part here as that one may have changed
+// ownership in the mean time!
 #define Result_release(v)                       \
     String_release((v).failure)
 #define Result_print_failure(fmt, v)            \
