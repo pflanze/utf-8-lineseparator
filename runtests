@@ -1,0 +1,129 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=' '
+
+successes=0
+failures=0
+errors=0
+
+success() {
+    successes=$(( successes + 1 ))
+}
+failure() {
+    echo "Test failure $@"
+    failures=$(( failures + 1 ))
+}
+error() {
+    echo "Error $@"
+    errors=$(( errors + 1 ))
+}
+
+
+# ------------------------------------------------------------------
+cmd=./test.san
+echo "Test running $cmd ..."
+if $cmd; then
+    success
+else
+    failure
+fi
+
+# ------------------------------------------------------------------
+cmd=./utf-8-lineseparator
+mkdir -p t/dir.in
+echo "Tests running $cmd on t/*.in ..."
+
+cmptmp=$(mktemp)
+
+for inp in t/*.in; do
+    base="$(dirname "$inp")/$(basename "$inp" .in)"
+    tmp=$base.tmp
+    out=$base.out
+    if "$cmd" "$inp" > "$tmp" 2>&1; then
+        if diff -u "$out" "$tmp" > "$cmptmp" 2>&1; then
+            success
+        else
+            failure "running $cmd on '$inp':"
+            cat "$cmptmp"
+            echo
+        fi
+    else
+        error "running $cmd on '$inp': exited with $?:"
+        cat "$tmp"
+        echo
+    fi
+    rm -f "$tmp"
+done
+
+# ------------------------------------------------------------------
+echo "Tests running $cmd on stdin from t/*.in ..."
+
+# copy-paste of above with just < redirection added:
+for inp in t/*.in; do
+    base="$(dirname "$inp")/$(basename "$inp" .in)"
+    tmp=$base.tmp
+    out=$base.out
+    if "$cmd" < "$inp" > "$tmp" 2>&1; then
+        if diff -u "$out" "$tmp" > "$cmptmp" 2>&1; then
+            success
+        else
+            failure "running $cmd on '$inp':"
+            cat "$cmptmp"
+            echo
+        fi
+    else
+        error "running $cmd on '$inp': exited with $?:"
+        cat "$tmp"
+        echo
+    fi
+    rm -f "$tmp"
+done
+
+# ------------------------------------------------------------------
+echo "Tests running $cmd with IO errors ..."
+
+export nopermtmp=$(mktemp)
+chmod a-rwx "$nopermtmp"
+
+export errtmp=$(mktemp)
+export outtmp=$(mktemp)
+
+cmd=$(printf './utf-8-lineseparator %q' "$nopermtmp")
+set +e
+$cmd > "$outtmp" 2> "$errtmp"
+ec=$?
+set -e
+
+if [ $ec -eq 1 ]; then
+    if diff -u t/nopermtmp.out "$outtmp" > "$cmptmp" 2>&1; then
+        success
+    else
+        failure "running $cmd:"
+        cat "$cmptmp"
+        echo
+    fi
+    if diff -u t/nopermtmp.err "$errtmp" > "$cmptmp" 2>&1; then
+        success
+    else
+        failure "running $cmd:"
+        cat "$cmptmp"
+        echo
+    fi
+else
+    failure "running $cmd should exit with code 1, but gave: $ec"
+    bash
+fi
+rm -f "$errtmp" "$outtmp" "$nopermtmp"
+
+# ------------------------------------------------------------------
+echo "$0: test results: $successes success(es), $failures failure(s), $errors error(s)"
+
+rm -f "$cmptmp"
+
+if [ $errors -ne 0 -o $failures -ne 0 ]; then
+    exit 1
+else
+    exit 0
+fi
+
