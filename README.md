@@ -8,17 +8,18 @@ extended to take on more functionality.
 
 But this project also provides a "framework" (tooling infrastructure
 and libraries) for writing programs in a manner that is a bit more
-like one would work with Rust, and that uses verification tooling to try to
-make it fully safe, primarily via [AFL++](https://aflplus.plus/). Note
-that even a coverage-guided fuzzer doesn't guarantee to find all bugs
-(and in fact in large enough software is pretty much guaranteed to not
-do that), but, by limiting the scope of the program exposed to fuzzing
-(currently the whole of `utf-8-lineseparator` is small enough to
-qualify) by giving choosable access to subsets (like unit testing) and
-verifying via coverage tooling that no part remains untested, we hope
-to scale this up to larger programs.  The project also takes a number
-of further approaches to minimize the potential issues. See our
-[approach](docs/approach.md) for further details.
+like one would work with Rust, and that uses verification tooling to
+try to make it fully safe, primarily by using
+[AFL++](https://aflplus.plus/) in combination with the sanitizers
+(ASAN, UBSAN). Even a coverage-guided fuzzer like AFL++ doesn't
+guarantee to find all bugs (and in fact given large enough software is
+pretty much guaranteed not to), but, by limiting the scope of the
+program exposed to fuzzing (currently the whole of
+`utf-8-lineseparator` is small enough to qualify) by giving access to
+subsets of the program (similar to unit testing) and verifying via
+coverage tooling that no part remains untested, we hope to scale this
+up to larger programs.  See our [approach](docs/approach.md) to
+development and security for further details.
 
 ## Note about CSV
 
