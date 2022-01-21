@@ -69,8 +69,8 @@ runaflcov: utf-8-lineseparator.cov
 	bin/runaflcov ./utf-8-lineseparator.cov aflfind
 
 
-runtests: test.san
-	./test.san
+runtests: test.san utf-8-lineseparator
+	./runtests
 
 runtestsgdb: test
 	gdbrun ./test
@@ -91,4 +91,4 @@ clean:
 	rm -f $(binaries) *.profdata
 	rm -rf ./*.profraw/
 
-.PHONY: clean
+.PHONY: clean runtests
