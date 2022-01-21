@@ -295,7 +295,7 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
             // unclear!
             s->filestream.maybe_fd = FD_NOTHING;
             s->filestream.maybe_failure = strerror_String(err);
-            RETURN(Error(Unit, s->filestream.maybe_failure));
+            RETURN(Error(Unit, String_clone(&s->filestream.maybe_failure)));
         } else {
             s->filestream.maybe_fd = FD_NOTHING;
             RETURN(Ok(Unit) {} ENDOk);
@@ -335,7 +335,7 @@ Result_Maybe_u8 BufferedStream_getc(BufferedStream *s) {
             } else if (s->filestream.maybe_failure.str) {
                 // return previously seen failure (OK?)
                 return (Result_Maybe_u8) {
-                    s->filestream.maybe_failure,
+                    String_clone(&s->filestream.maybe_failure),
                     Nothing(u8)
                 };
             } else {
@@ -351,7 +351,7 @@ Result_Maybe_u8 BufferedStream_getc(BufferedStream *s) {
                         }
                         s->filestream.maybe_failure = strerror_String(err);
                         /* return (Result_Maybe_u8) { */
-                        /*     s->filestream.maybe_failure, */
+                        /*     String_clone(&s->filestream.maybe_failure), */
                         /*     Nothing(u8) */
                         /* }; */
                     } else if (n == 0) {

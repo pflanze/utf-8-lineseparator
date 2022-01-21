@@ -3,6 +3,14 @@
   Published under the terms of the MIT License, see the LICENSE file.
 */
 
+/*
+  This is used to pass around read-only strings, as C strings and the
+  information whether they need to be freed on release.
+
+  String_clone does not copy the memory if needs_freeing is false,
+  since it is then assumed that it is memory with static life time.
+*/
+
 #ifndef STRING_H_
 #define STRING_H_
 
@@ -33,6 +41,23 @@ void String_release(String s) {
     }
 }
 
+/*
+  String_clone does not copy the memory if needs_freeing is false,
+  since it is then assumed that it is memory with static life time.
+
+  If you want a String_copy that always copies for mutation (or if the
+  above assumption is violated), you'll have to add it to this
+  library. Note that so far nothing in this library is designed for
+  mutation.
+*/
+static
+String String_clone(const String *s) {
+    if (s->needs_freeing) {
+        return copy_String(s->str);
+    } else {
+        return *s;
+    }
+}
 
 static
 String String_quote_sh(const char *str) {
