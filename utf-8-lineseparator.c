@@ -111,7 +111,7 @@ int main(int argc, const char**argv) {
                 literal_String("AFL buffer"));
 
             int res = report(&in);
-            fprintf(stderr, "report returned with exit code %i\n", res);
+            WARN_("report returned with exit code %i", res);
             BufferedStream_close(&in);
             BufferedStream_release(&in);
 
@@ -135,7 +135,7 @@ int main(int argc, const char**argv) {
                 // XX should this have the path in the message,
                 // already? Should there be a
                 // BufferedStream_error_message method?
-                fprintf(stderr, "close: %s", r.failure.str);
+                WARN_("close: %s", r.failure.str);
                 res = 1; // OK?
             }
             Result_release(r);
@@ -151,7 +151,7 @@ int main(int argc, const char**argv) {
                 // XX should this have the path in the message,
                 // already? Should there be a
                 // BufferedStream_error_message method?
-                fprintf(stderr, "open: %s", r_in.failure.str);
+                WARN_("open: %s", r_in.failure.str);
                 Result_release(r_in);
                 leakcheck_verify(false);
                 return 1;
@@ -160,7 +160,7 @@ int main(int argc, const char**argv) {
             int res = report(&r_in.ok);
             Result_Unit r = BufferedStream_close(&r_in.ok);
             if (Result_is_failure(r)) {
-                fprintf(stderr, "close: %s", r.failure.str);
+                WARN_("close: %s", r.failure.str);
                 res = 1; // OK?
             }
             Result_release(r);
@@ -170,11 +170,10 @@ int main(int argc, const char**argv) {
             leakcheck_verify(false);
             return res;
         } else {
-            fprintf(stderr,
-                    "Usage: %s [file]\n"
-                    "  Verify proper UTF-8 encoding and report usage of CR and LF\n"
-                    "  characters in <file> if given, otherwise of STDIN.\n",
-                    argv[0]);
+            WARN_("Usage: %s [file]\n"
+                  "  Verify proper UTF-8 encoding and report usage of CR and LF\n"
+                  "  characters in <file> if given, otherwise of STDIN.\n",
+                  argv[0]);
             leakcheck_verify(false);
             return 1;
         }
