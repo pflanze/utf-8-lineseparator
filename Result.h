@@ -19,9 +19,8 @@
 
 #define Error(T, string)                        \
     (Result(T)) { string, default_##T }
-#define Ok(T)                                   \
-    (Result(T)) { noString, (T)
-#define ENDOk }
+#define Ok(T, val)                              \
+    (Result(T)) { noString, (T) val }
 
 #define Result_is_success(v) (!((v).failure.str))
 #define Result_is_failure(v) (!!((v).failure.str))
@@ -51,7 +50,7 @@
         if (bar) RETURNL(l1, val1);
         Result_foo x = givingx();
         PROPAGATEL_Result(l2, Sometype, x);
-        RETURN(Ok(Sometype) val2 ENDOk);
+        RETURN(Ok(Sometype, val2));
      l2:
         Result_release(x);
      l1:

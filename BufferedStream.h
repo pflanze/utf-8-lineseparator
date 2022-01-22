@@ -165,21 +165,22 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
         free(buf);
         return Error(BufferedStream, strerror_String(err));
     }
-    return Ok(BufferedStream) (BufferedStream) {
-        .buffer = Buffer_from_buf(true,
-                                  buf,
-                                  BufferedStream_buffersize),
-        .is_closed = false,
-        .has_path = true,
-        .maybe_path_or_name = path,
-        .direction = direction,
-        .stream_type = STREAM_TYPE_FILESTREAM,
-        .filestream = (_FileStream) {
-            .maybe_fd = fd,
-            .is_exhausted = false,
-            .maybe_failure = noString
-        }
-    } ENDOk;
+    return Ok(BufferedStream,
+              ((BufferedStream) {
+                  .buffer = Buffer_from_buf(true,
+                                            buf,
+                                            BufferedStream_buffersize),
+                  .is_closed = false,
+                  .has_path = true,
+                  .maybe_path_or_name = path,
+                  .direction = direction,
+                  .stream_type = STREAM_TYPE_FILESTREAM,
+                  .filestream = (_FileStream) {
+                      .maybe_fd = fd,
+                      .is_exhausted = false,
+                      .maybe_failure = noString
+                  }
+              }));
 }
 
 UNUSED static
@@ -231,7 +232,7 @@ retry: {
             // done
             s->buffer.slice.startpos = 0;
             s->buffer.slice.endpos = 0;
-            return Ok(Unit) {} ENDOk;
+            return Ok(Unit, {});
         } else {
             // partial write
             s->buffer.slice.startpos += n;
@@ -248,7 +249,7 @@ Result_Unit BufferedStream_flush(BufferedStream *s) {
         return Error(Unit, literal_String("flush: stream is closed"));
     }
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
-        return Ok(Unit) {} ENDOk;
+        return Ok(Unit, {});
     }
     else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
         assert(s->filestream.maybe_fd != FD_NOTHING);
@@ -271,7 +272,7 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
     }
     BEGIN_PROPAGATE(Unit);
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
-        RETURN(Ok(Unit) {} ENDOk);
+        RETURN(Ok(Unit, {}));
     }
     else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
         // First check and return on previous failure? No! Need to
@@ -298,7 +299,7 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
             RETURN(Error(Unit, String_clone(&s->filestream.maybe_failure)));
         } else {
             s->filestream.maybe_fd = FD_NOTHING;
-            RETURN(Ok(Unit) {} ENDOk);
+            RETURN(Ok(Unit, {}));
         }
     }
     else {
@@ -323,15 +324,15 @@ Result_Maybe_u8 BufferedStream_getc(BufferedStream *s) {
     
     Maybe_u8 c = Buffer_getc(&s->buffer);
     if (Maybe_is_just(c)) {
-        return Ok(Maybe_u8) c ENDOk;
+        return Ok(Maybe_u8, c);
     } else {
         if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
             // there's nothing to do with s->bufferstream, simply:
-            return Ok(Maybe_u8) Nothing(u8) ENDOk;
+            return Ok(Maybe_u8, Nothing(u8));
         }
         else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
             if (s->filestream.is_exhausted) {
-                return Ok(Maybe_u8) Nothing(u8) ENDOk;
+                return Ok(Maybe_u8, Nothing(u8));
             } else if (s->filestream.maybe_failure.str) {
                 // return previously seen failure (OK?)
                 return (Result_Maybe_u8) {
@@ -357,7 +358,7 @@ Result_Maybe_u8 BufferedStream_getc(BufferedStream *s) {
                     } else if (n == 0) {
                         // EOF
                         s->filestream.is_exhausted = true;
-                        //return Ok(Maybe_u8) Nothing(u8) ENDOk;
+                        //return Ok(Maybe_u8, Nothing(u8));
                     } else {
                         s->buffer.slice.startpos = 0;
                         s->buffer.slice.endpos = n;
@@ -383,7 +384,7 @@ Result_Unit BufferedStream_putc(BufferedStream *s, unsigned char c) {
     }
 
     if (Buffer_putc(&s->buffer, c)) {
-        return Ok(Unit) {} ENDOk;
+        return Ok(Unit, {});
     } else {
         if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
             // XX include name in message, right?

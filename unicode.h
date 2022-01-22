@@ -26,7 +26,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
     Result_Maybe_u8 b1 = BufferedStream_getc(in);
     PROPAGATE_Result(Maybe_u32, b1);
     if (b1.ok.is_nothing) {
-        return Ok(Maybe_u32) Nothing(u32) ENDOk;
+        return Ok(Maybe_u32, Nothing(u32));
     }
     if ((b1.ok.value & 128) == 0) {
         // 1 byte
@@ -68,7 +68,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
         }
     }
     if (codepoint <= 0x10FFFF) {
-        return Ok(Maybe_u32) Just(u32) codepoint ENDJust ENDOk;
+        return Ok(Maybe_u32, Just(u32) codepoint ENDJust);
     } else {
         char msg[EBUFSIZ];
         snprintf(msg, EBUFSIZ,
