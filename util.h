@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "macro-util.h"
 
 
 #define UNUSED __attribute__ ((unused))
@@ -35,9 +36,6 @@
     __typeof__ (to) __for_range_to = (to);              \
     for (int var = (from); var < __for_range_to; var++)
 
-
-#define XSTR(s) STR(s)
-#define STR(s) #s
 
 // An alternative to assert from assert.h that works better with
 // coverage for AFL (runaflcov make target)
