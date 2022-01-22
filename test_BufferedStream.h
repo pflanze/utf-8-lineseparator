@@ -66,7 +66,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                     PROPAGATEL_Result(rmc, Unit, rmc);
                     if (rmc.ok.is_nothing) {
                         RETURNL(rmc, Error(Unit, literal_String(
-                                               "bug: file is too short")));
+                                               "bug: file is too small")));
                     } else {
                         if (! (rmc.ok.value == buf[i])) {
                             RETURNL(rmc, Error(Unit, literal_String(
@@ -78,7 +78,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                 PROPAGATEL_Result(rmc, Unit, rmc);
                 if (! rmc.ok.is_nothing) {
                     RETURNL(rmc, Error(Unit, literal_String(
-                                           "bug: file is too long")));
+                                           "bug: file is too large")));
                 }
 
                 {
