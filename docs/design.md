@@ -98,6 +98,13 @@ why `DEFTYPE_Maybe_` defines `Maybe_int` as a typedef so that the
 `struct ` prefix isn't needed, so that the `Maybe_int` type itself be
 used as a parameter for another DEFTYPE style macro.
 
+<small>Note: while it is possible to produce type names via macros on
+the fly, e.g. `Maybe(int)`, they have to output the type name. It's
+not possible to recreate the struct on the fly anonymously, since C
+has nominal, not structural typing (the anonymous structs would not
+match the ones created on the fly in other places, even if the type
+expression (macro call) is the same).</small>
+
 The Maybe types need to be checked via their `.is_nothing` attribute
 whether they actually contain a value.
 
@@ -234,9 +241,6 @@ These rules sound a bit complicated but the reason for them is so that:
     lower-case arguments)
  1. type names are generated via macros and need to remain
     unambiguous, too.
-
-(The third reason might become obsolete if moving to use macros to
-parameterize a type on the fly, like `Result(Maybe(u8)) v;` (todo?).)
 
 ## Leakcheck
 
