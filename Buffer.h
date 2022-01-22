@@ -10,13 +10,13 @@
 #include <stdbool.h>
 
 #include "shorttypenames.h"
-#include "Maybe.h"
+#include "Option.h"
 #include "Slice.h"
 #include "util.h" /* UNUSED */
 
 
-DEFTYPE_Maybe_(u8);
-#define default_Maybe_u8 {}
+DEFTYPE_Option(u8);
+#define default_Option_u8 {}
 
 DEFTYPE_Slice_(u8);
 
@@ -70,11 +70,11 @@ void Buffer_release(Buffer *b) {
 }
 
 static
-Maybe_u8 Buffer_getc(Buffer *b) {
+Option_u8 Buffer_getc(Buffer *b) {
     if (Slice_is_empty(b->slice)) {
-        return Nothing(u8);
+        return None(u8);
     } else {
-        return Just(u8, Slice_get_unsafe(b->slice));
+        return Some(u8, Slice_get_unsafe(b->slice));
     }
 }
 

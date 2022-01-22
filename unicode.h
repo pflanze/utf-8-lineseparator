@@ -10,23 +10,23 @@
 #include "shorttypenames.h" /* u8 u32 */
 #include "BufferedStream.h"
 #include "Result.h"
-#include "Maybe.h"
+#include "Option.h"
 
 
-DEFTYPE_Maybe_(u32);
-#define default_Maybe_u32
-DEFTYPE_Result_(Maybe_u32);
+DEFTYPE_Option(u32);
+#define default_Option_u32
+DEFTYPE_Result_(Option_u32);
 
 
 static
-Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
+Result_Option_u32 get_unicodechar(BufferedStream *in) {
     // https://en.wikipedia.org/wiki/Utf-8#Encoding
 #define EBUFSIZ 256
     u32 codepoint;
-    Result_Maybe_u8 b1 = BufferedStream_getc(in);
-    PROPAGATE_Result(Maybe_u32, b1);
+    Result_Option_u8 b1 = BufferedStream_getc(in);
+    PROPAGATE_Result(Option_u32, b1);
     if (b1.ok.is_nothing) {
-        return Ok(Maybe_u32, Nothing(u32));
+        return Ok(Option_u32, None(u32));
     }
     if ((b1.ok.value & 128) == 0) {
         // 1 byte
@@ -43,38 +43,38 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
             numbytes = 4;
             codepoint = b1.ok.value & 0b111;
         } else {
-            return Error(Maybe_u32, literal_String(
+            return Error(Option_u32, literal_String(
                              "invalid start byte decoding UTF-8"));
         }
         for (int i = 1; i < numbytes; i++) {
-            Result_Maybe_u8 b = BufferedStream_getc(in);
-            PROPAGATE_Result(Maybe_u32, b);
+            Result_Option_u8 b = BufferedStream_getc(in);
+            PROPAGATE_Result(Option_u32, b);
             if (b.ok.is_nothing) {
                 char msg[EBUFSIZ];
                 snprintf(msg, EBUFSIZ,
                          "premature EOF decoding UTF-8 (byte #%i)",
                          i+1);
-                return Error(Maybe_u32, copy_String(msg));
+                return Error(Option_u32, copy_String(msg));
             }
             if ((b.ok.value & 0b11000000) != 0b10000000) {
                 char msg[EBUFSIZ];
                 snprintf(msg, EBUFSIZ,
                          "invalid continuation byte decoding UTF-8 (byte #%i)",
                          i+1);
-                return Error(Maybe_u32, copy_String(msg));
+                return Error(Option_u32, copy_String(msg));
             }
             codepoint <<= 6;
             codepoint |= (b.ok.value & 0b00111111);
         }
     }
     if (codepoint <= 0x10FFFF) {
-        return Ok(Maybe_u32, Just(u32, codepoint));
+        return Ok(Option_u32, Some(u32, codepoint));
     } else {
         char msg[EBUFSIZ];
         snprintf(msg, EBUFSIZ,
                  "invalid unicode codepoint (%u, 0x%x)",
                  codepoint, codepoint);
-        return Error(Maybe_u32, copy_String(msg));
+        return Error(Option_u32, copy_String(msg));
     }
 #undef EBUFSIZ
 }

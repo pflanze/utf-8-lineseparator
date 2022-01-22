@@ -19,7 +19,7 @@ C does not have that feature. There are two standard approaches for
 such containers, one is to use a single type definition with a pointer
 of unknown type and then using unsafe type casting:
 
-    struct Maybe {
+    struct Option {
         void *maybe_value;
         // (no need for separate switch to indicate whether a 
         // value is contained, as the pointer can be NULL.) 
@@ -28,11 +28,11 @@ of unknown type and then using unsafe type casting:
     int main() {
         int *myvalp = malloc(sizeof(int));
         *myvalp = 42;
-        struct Maybe mf = { (void *)&myvalp };
+        struct Option mf = { (void *)&myvalp };
         int *myvalpalias = (int *)mf.maybe_value;
 
         const char *mystr = "foo";
-        struct Maybe ms = { (void *)mystr };
+        struct Option ms = { (void *)mystr };
         const char *mystralias = (const char *)ms.maybe_value;
     }
 
@@ -41,46 +41,46 @@ the pointers and the unsafe casts are sources of memory safety bugs.
 
 The other is defining the container for every contained type used.
 
-    struct Maybe_int {
+    struct Option_int {
         bool is_nothing;
         int value;
     };
 
-    struct Maybe_str {
+    struct Option_str {
         bool is_nothing;
         const char *value;
     };
 
     int main() {
         int myval = 42;
-        struct Maybe_int mf = { false, myval };
+        struct Option_int mf = { false, myval };
         int myvalcopy = mf.value;
 
         const char *mystr = "foo";
-        struct Maybe_str ms = { false, mystr };
+        struct Option_str ms = { false, mystr };
         const char *mystralias = ms.value;
     }
 
 This is type and memory safe, but redefining the container type
 manually is getting tedious fast. But C has macros, which this project
 is taking advantage of (the include here is referring to
-[Maybe.h](../Maybe.h)):
+[Option.h](../Option.h)):
 
-    #include "Maybe.h"
+    #include "Option.h"
 
-    DEFTYPE_Maybe_(int);
+    DEFTYPE_Option(int);
     typedef const char* str;
-    DEFTYPE_Maybe_(str);
+    DEFTYPE_Option(str);
     
     int main() {
         int myval = 42;
-        // Maybe_int mf = { false, myval };
+        // Option_int mf = { false, myval };
         //  -- or, hiding the implementation: --
-        Maybe_int mf = Just(int, myval);
+        Option_int mf = Some(int, myval);
         int myvalcopy = mf.value;
 
         const char *mystr = "foo";
-        Maybe_str ms = Just(str, mystr);
+        Option_str ms = Some(str, mystr);
         const char *mystralias = ms.value;
     }
 
@@ -88,30 +88,30 @@ When it seems unclear what code the macros generate, run `make expand`
 and look at the file with the name of the binary but with the suffix
 `.E.c` (`utf-8-lineseparator.E.c` or `test.E.c`).
 
-Since the `DEFTYPE_Maybe_` macro creates a new type name by simply
+Since the `DEFTYPE_Option` macro creates a new type name by simply
 appending the name of the type given as its argument to
-`Maybe_`, the argument must not contain anything other than word
+`Option_`, the argument must not contain anything other than word
 characters (`\w+`). For this reason, `typedef` is consistently used to
 create type names that do not contain spaces or other punctuation,
 e.g. generating the punctuation-less type name `str` above, but also
-why `DEFTYPE_Maybe_` defines `Maybe_int` as a typedef so that the
-`struct ` prefix isn't needed, so that the `Maybe_int` type itself be
+why `DEFTYPE_Option` defines `Option_int` as a typedef so that the
+`struct ` prefix isn't needed, so that the `Option_int` type itself be
 used as a parameter for another DEFTYPE style macro.
 
 <small>Note: while it is possible to produce type names via macros on
-the fly, e.g. `Maybe(int)`, they have to output the type name. It's
+the fly, e.g. `Option(int)`, they have to output the type name. It's
 not possible to recreate the struct on the fly anonymously, since C
 has nominal, not structural typing (the anonymous structs would not
 match the ones created on the fly in other places, even if the type
 expression (macro call) is the same).</small>
 
-The Maybe types need to be checked via their `.is_nothing` attribute
+The Option types need to be checked via their `.is_nothing` attribute
 whether they actually contain a value.
 
 ### Result
 
 The file [Result.h](../Result.h)) defines the parametrized Result
-type. A Result can contain a value similar to a Maybe, but instead of
+type. A Result can contain a value similar to an Option, but instead of
 containing nothing in the alternate case, they contain an
 error. Currently this is always simply a string; i.e. whenever a
 function can return an error, it returns a type derived via

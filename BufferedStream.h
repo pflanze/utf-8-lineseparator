@@ -19,7 +19,7 @@
 
 #include "io.h"
 #include "shorttypenames.h"
-#include "Maybe.h"
+#include "Option.h"
 #include "Result.h"
 #include "Buffer.h"
 #include "util.h"
@@ -33,7 +33,7 @@ const size_t BufferedStream_buffersize = 4096*4;
 typedef struct { } Unit;
 #define default_Unit {}
 
-DEFTYPE_Result_(Maybe_u8);
+DEFTYPE_Result_(Option_u8);
 DEFTYPE_Result_(Unit);
 
 
@@ -313,31 +313,31 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
 }
 
 static
-Result_Maybe_u8 BufferedStream_getc(BufferedStream *s) {
+Result_Option_u8 BufferedStream_getc(BufferedStream *s) {
     if (s->is_closed) {
-        return Error(Maybe_u8, literal_String("getc: stream is closed"));
+        return Error(Option_u8, literal_String("getc: stream is closed"));
     }
     if (! (s->direction & STREAM_DIRECTION_IN)) {
-        return Error(Maybe_u8, literal_String(
+        return Error(Option_u8, literal_String(
                          "getc: stream was not opened for input"));
     }
     
-    Maybe_u8 c = Buffer_getc(&s->buffer);
-    if (Maybe_is_just(c)) {
-        return Ok(Maybe_u8, c);
+    Option_u8 c = Buffer_getc(&s->buffer);
+    if (Option_is_some(c)) {
+        return Ok(Option_u8, c);
     } else {
         if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
             // there's nothing to do with s->bufferstream, simply:
-            return Ok(Maybe_u8, Nothing(u8));
+            return Ok(Option_u8, None(u8));
         }
         else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
             if (s->filestream.is_exhausted) {
-                return Ok(Maybe_u8, Nothing(u8));
+                return Ok(Option_u8, None(u8));
             } else if (s->filestream.maybe_failure.str) {
                 // return previously seen failure (OK?)
-                return (Result_Maybe_u8) {
+                return (Result_Option_u8) {
                     String_clone(&s->filestream.maybe_failure),
-                    Nothing(u8)
+                    None(u8)
                 };
             } else {
                 // replenish the buffer
@@ -351,14 +351,14 @@ Result_Maybe_u8 BufferedStream_getc(BufferedStream *s) {
                             goto retry;
                         }
                         s->filestream.maybe_failure = strerror_String(err);
-                        /* return (Result_Maybe_u8) { */
+                        /* return (Result_Option_u8) { */
                         /*     String_clone(&s->filestream.maybe_failure), */
-                        /*     Nothing(u8) */
+                        /*     None(u8) */
                         /* }; */
                     } else if (n == 0) {
                         // EOF
                         s->filestream.is_exhausted = true;
-                        //return Ok(Maybe_u8, Nothing(u8));
+                        //return Ok(Option_u8, None(u8));
                     } else {
                         s->buffer.slice.startpos = 0;
                         s->buffer.slice.endpos = n;

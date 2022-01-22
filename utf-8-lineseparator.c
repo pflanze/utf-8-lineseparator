@@ -30,7 +30,7 @@ int report(BufferedStream* in /* borrowed */) {
     int64_t column = 0;
     bool last_was_CR = false;
     while (1) {
-        Result_Maybe_u32 c = get_unicodechar(in);
+        Result_Option_u32 c = get_unicodechar(in);
         if (Result_is_failure(c)) {
             int64_t linecount = LFcount + CRcount + CRLFcount;
             const char *questionable =

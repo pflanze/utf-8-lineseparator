@@ -32,7 +32,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
     PROPAGATEL_Result(rs, Unit, rs);
 
     {
-        Result_Maybe_u8 rmc0 = BufferedStream_getc(&rs.ok);
+        Result_Option_u8 rmc0 = BufferedStream_getc(&rs.ok);
         // getc on write-only file handle must fail:
         TEST_ASSERT(Result_is_failure(rmc0));
         if (Result_is_failure(rmc0)) {
@@ -60,7 +60,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                     literal_String(".test.out"));
                 PROPAGATEL_Result(rs2, Unit, rs2);
 
-                Result_Maybe_u8 rmc;
+                Result_Option_u8 rmc;
                 for (int i = 0; i < TBUFSIZ; i++) {
                     rmc = BufferedStream_getc(&rs2.ok);
                     PROPAGATEL_Result(rmc, Unit, rmc);

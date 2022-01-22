@@ -66,7 +66,7 @@ approaches:
              (todo: rename to `owned`?)
       - not using unsafe type casting, instead:
           - using macros to generate parameterized types for
-            containers (e.g. `Maybe` and `Result`)
+            containers (e.g. `Option` and `Result`)
           - using type tags with unions and wrappers around them that
             prevent invalid use
       - limit the use of arrays to library functionality, or static

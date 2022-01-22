@@ -43,11 +43,11 @@ void monkey_register_monkeywrapperstate(MonkeyWrapperState *st) {
 
 static
 MonkeyWrapperState new_MonkeyWrapperState() {
-    Maybe_u8 mc = Buffer_getc(&monkey_buf);
+    Option_u8 mc = Buffer_getc(&monkey_buf);
     if (mc.is_nothing) {
         DIE("not enough fuzzer input for monkey");
     }
-    Maybe_u8 mc2 = Buffer_getc(&monkey_buf);
+    Option_u8 mc2 = Buffer_getc(&monkey_buf);
     if (mc2.is_nothing) {
         DIE("not enough fuzzer input for monkey");
     }
@@ -86,12 +86,12 @@ void monkey_release() {
 
 UNUSED static
 void monkeywrapperstate_refresh_both(MonkeyWrapperState *s) {
-    Maybe_u8 mc = Buffer_getc(&monkey_buf);
+    Option_u8 mc = Buffer_getc(&monkey_buf);
     if (mc.is_nothing) {
         DIE("not enough fuzzer input for monkey");
     }
     s->waits = mc.value;
-    Maybe_u8 mc2 = Buffer_getc(&monkey_buf);
+    Option_u8 mc2 = Buffer_getc(&monkey_buf);
     if (mc2.is_nothing) {
         DIE("not enough fuzzer input for monkey");
     }
@@ -100,7 +100,7 @@ void monkeywrapperstate_refresh_both(MonkeyWrapperState *s) {
 
 UNUSED static
 void monkeywrapperstate_refresh_waits(MonkeyWrapperState *s) {
-    Maybe_u8 mc = Buffer_getc(&monkey_buf);
+    Option_u8 mc = Buffer_getc(&monkey_buf);
     if (mc.is_nothing) {
         DIE("not enough fuzzer input for monkey");
     }
@@ -109,7 +109,7 @@ void monkeywrapperstate_refresh_waits(MonkeyWrapperState *s) {
 
 UNUSED static
 void monkeywrapperstate_refresh_other(MonkeyWrapperState *s) {
-    Maybe_u8 mc2 = Buffer_getc(&monkey_buf);
+    Option_u8 mc2 = Buffer_getc(&monkey_buf);
     if (mc2.is_nothing) {
         DIE("not enough fuzzer input for monkey");
     }
