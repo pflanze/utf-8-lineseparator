@@ -31,7 +31,7 @@ int report(BufferedStream* in /* borrowed */) {
     bool last_was_CR = false;
     while (1) {
         Result_Option_u32 c = get_unicodechar(in);
-        if (Result_is_failure(c)) {
+        if (Result_is_Err(c)) {
             int64_t linecount = LFcount + CRcount + CRLFcount;
             const char *questionable =
                 (linecount == MAX3(LFcount, CRcount, CRLFcount)) ? "false" : "true";
@@ -131,7 +131,7 @@ int main(int argc, const char**argv) {
                                   false);
             int res = report(&in);
             Result_Unit r = BufferedStream_close(&in);
-            if (Result_is_failure(r)) {
+            if (Result_is_Err(r)) {
                 // XX should this have the path in the message,
                 // already? Should there be a
                 // BufferedStream_error_message method?
@@ -147,7 +147,7 @@ int main(int argc, const char**argv) {
             const char *path = argv[1];
             Result_BufferedStream r_in =
                 open_r_BufferedStream(borrowing_String(path));
-            if (Result_is_failure(r_in)) {
+            if (Result_is_Err(r_in)) {
                 // XX should this have the path in the message,
                 // already? Should there be a
                 // BufferedStream_error_message method?
@@ -159,7 +159,7 @@ int main(int argc, const char**argv) {
 
             int res = report(&r_in.ok);
             Result_Unit r = BufferedStream_close(&r_in.ok);
-            if (Result_is_failure(r)) {
+            if (Result_is_Err(r)) {
                 WARN_("close: %s", r.failure.str);
                 res = 1; // OK?
             }

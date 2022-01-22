@@ -60,7 +60,7 @@ void t_utf8_equal_codepoint(u32 codepoint,
                             TestStatistics *stats) {
     Result_u32 rc =
         buf_to_utf8_codepoint(buf, buflen);
-    if (Result_is_failure(rc)) {
+    if (Result_is_Err(rc)) {
         WARN_("*** Error running test: %s at %s:%i",
               rc.failure.str,
               sourcefile,
