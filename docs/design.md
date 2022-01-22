@@ -76,11 +76,11 @@ is taking advantage of (the include here is referring to
         int myval = 42;
         // Maybe_int mf = { false, myval };
         //  -- or, hiding the implementation: --
-        Maybe_int mf = Just(int) myval ENDJust;
+        Maybe_int mf = Just(int, myval);
         int myvalcopy = mf.value;
 
         const char *mystr = "foo";
-        Maybe_str ms = Just(str) mystr ENDJust;
+        Maybe_str ms = Just(str, mystr);
         const char *mystralias = ms.value;
     }
 

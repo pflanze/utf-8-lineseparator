@@ -74,7 +74,7 @@ Maybe_u8 Buffer_getc(Buffer *b) {
     if (Slice_is_empty(b->slice)) {
         return Nothing(u8);
     } else {
-        return Just(u8) Slice_get_unsafe(b->slice) ENDJust;
+        return Just(u8, Slice_get_unsafe(b->slice));
     }
 }
 

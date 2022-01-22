@@ -17,9 +17,8 @@
 
 #define Nothing(T)                              \
     (Maybe_##T) { true, default_##T }
-#define Just(T)                                 \
-    (Maybe_##T) { false,
-#define ENDJust  }
+#define Just(T, val)                            \
+    (Maybe_##T) { false, val }
 
 #define Maybe_is_just(v) (!(v).is_nothing)
 

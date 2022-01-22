@@ -68,7 +68,7 @@ Result_Maybe_u32 get_unicodechar(BufferedStream *in) {
         }
     }
     if (codepoint <= 0x10FFFF) {
-        return Ok(Maybe_u32, Just(u32) codepoint ENDJust);
+        return Ok(Maybe_u32, Just(u32, codepoint));
     } else {
         char msg[EBUFSIZ];
         snprintf(msg, EBUFSIZ,
