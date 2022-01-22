@@ -15,7 +15,7 @@ failure() {
     failures=$(( failures + 1 ))
 }
 error() {
-    echo "Error $@"
+    echo "Err $@"
     errors=$(( errors + 1 ))
 }
 

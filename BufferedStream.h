@@ -95,7 +95,7 @@ BufferedStream Buffer_to_BufferedStream(Buffer b /* owned */,
     assert_direction(direction);
     Buffer_assert(&b);
     if ((direction & STREAM_DIRECTION_OUT) && b.size == 0) {
-        /* return Error(Unit, literal_String( */
+        /* return Err(Unit, literal_String( */
         /*                  "can't use buffer of size 0 for writing")); */
         // Treat this as a bug, to keep the return type non-Result, hmm?
         DIE("can't use buffer of size 0 for writing");
@@ -163,7 +163,7 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
         int err = errno;
         String_release(path);
         free(buf);
-        return Error(BufferedStream, strerror_String(err));
+        return Err(BufferedStream, strerror_String(err));
     }
     return Ok(BufferedStream,
               ((BufferedStream) {
@@ -227,7 +227,7 @@ retry: {
                 goto retry;
             }
             s->filestream.optional_failure = strerror_String(err);
-            return Error(Unit, {});
+            return Err(Unit, {});
         } else if ((size_t)n == Slice_length(s->buffer.slice)) {
             // done
             s->buffer.slice.startpos = 0;
@@ -246,7 +246,7 @@ retry: {
 static
 Result_Unit BufferedStream_flush(BufferedStream *s) {
     if (s->is_closed) {
-        return Error(Unit, literal_String("flush: stream is closed"));
+        return Err(Unit, literal_String("flush: stream is closed"));
     }
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
         return Ok(Unit, {});
@@ -268,7 +268,7 @@ Result_Unit BufferedStream_flush(BufferedStream *s) {
 static
 Result_Unit BufferedStream_close(BufferedStream *s) {
     if (s->is_closed) {
-        return Error(Unit, literal_String("close: stream is already closed"));
+        return Err(Unit, literal_String("close: stream is already closed"));
     }
     BEGIN_PROPAGATE(Unit);
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
@@ -296,7 +296,7 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
             // unclear!
             s->filestream.optional_fd = FD_NONE;
             s->filestream.optional_failure = strerror_String(err);
-            RETURN(Error(Unit, String_clone(&s->filestream.optional_failure)));
+            RETURN(Err(Unit, String_clone(&s->filestream.optional_failure)));
         } else {
             s->filestream.optional_fd = FD_NONE;
             RETURN(Ok(Unit, {}));
@@ -315,10 +315,10 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
 static
 Result_Option_u8 BufferedStream_getc(BufferedStream *s) {
     if (s->is_closed) {
-        return Error(Option_u8, literal_String("getc: stream is closed"));
+        return Err(Option_u8, literal_String("getc: stream is closed"));
     }
     if (! (s->direction & STREAM_DIRECTION_IN)) {
-        return Error(Option_u8, literal_String(
+        return Err(Option_u8, literal_String(
                          "getc: stream was not opened for input"));
     }
     
@@ -376,10 +376,10 @@ Result_Option_u8 BufferedStream_getc(BufferedStream *s) {
 static
 Result_Unit BufferedStream_putc(BufferedStream *s, unsigned char c) {
     if (s->is_closed) {
-        return Error(Unit, literal_String("putc: stream is closed"));
+        return Err(Unit, literal_String("putc: stream is closed"));
     }
     if (! (s->direction & STREAM_DIRECTION_OUT)) {
-        return Error(Unit, literal_String(
+        return Err(Unit, literal_String(
                          "getc: stream was not opened for output"));
     }
 
@@ -388,7 +388,7 @@ Result_Unit BufferedStream_putc(BufferedStream *s, unsigned char c) {
     } else {
         if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
             // XX include name in message, right?
-            return Error(Unit, literal_String("putc to buffer: out of space"));
+            return Err(Unit, literal_String("putc to buffer: out of space"));
         }
         else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
             Result_Unit r = BufferedStream_flush(s);

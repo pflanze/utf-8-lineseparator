@@ -17,7 +17,7 @@
         T ok;                                   \
     } Result(T)
 
-#define Error(T, string)                        \
+#define Err(T, string)                        \
     (Result(T)) { string, default_##T }
 #define Ok(T, val)                              \
     (Result(T)) { noString, val }

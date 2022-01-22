@@ -43,7 +43,7 @@ Result_Option_u32 get_unicodechar(BufferedStream *in) {
             numbytes = 4;
             codepoint = b1.ok.value & 0b111;
         } else {
-            return Error(Option_u32, literal_String(
+            return Err(Option_u32, literal_String(
                              "invalid start byte decoding UTF-8"));
         }
         for (int i = 1; i < numbytes; i++) {
@@ -54,14 +54,14 @@ Result_Option_u32 get_unicodechar(BufferedStream *in) {
                 snprintf(msg, EBUFSIZ,
                          "premature EOF decoding UTF-8 (byte #%i)",
                          i+1);
-                return Error(Option_u32, copy_String(msg));
+                return Err(Option_u32, copy_String(msg));
             }
             if ((b.ok.value & 0b11000000) != 0b10000000) {
                 char msg[EBUFSIZ];
                 snprintf(msg, EBUFSIZ,
                          "invalid continuation byte decoding UTF-8 (byte #%i)",
                          i+1);
-                return Error(Option_u32, copy_String(msg));
+                return Err(Option_u32, copy_String(msg));
             }
             codepoint <<= 6;
             codepoint |= (b.ok.value & 0b00111111);
@@ -74,7 +74,7 @@ Result_Option_u32 get_unicodechar(BufferedStream *in) {
         snprintf(msg, EBUFSIZ,
                  "invalid unicode codepoint (%u, 0x%x)",
                  codepoint, codepoint);
-        return Error(Option_u32, copy_String(msg));
+        return Err(Option_u32, copy_String(msg));
     }
 #undef EBUFSIZ
 }
