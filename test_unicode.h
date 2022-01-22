@@ -119,7 +119,7 @@ void test_unicode(TestStatistics *stats) {
                         const unsigned char buf[] = { i0, i1, i2, i3 };
                         Result_u32 rc = buf_to_utf8_codepoint(
                             buf, sizeof(buf));
-                        // if (Result_is_success(rc)) ...
+                        // if (Result_is_Ok(rc)) ...
                         Result_release(rc);
 #pragma GCC diagnostic pop
                     }

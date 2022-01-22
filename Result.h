@@ -22,7 +22,7 @@
 #define Ok(T, val)                              \
     (Result(T)) { noString, val }
 
-#define Result_is_success(v) (!((v).failure.str))
+#define Result_is_Ok(v) (!((v).failure.str))
 #define Result_is_failure(v) (!!((v).failure.str))
 // #define Result_failure_str(v) ((v).failure.str)
 
