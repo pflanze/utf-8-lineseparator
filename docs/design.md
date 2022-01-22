@@ -116,7 +116,7 @@ type. A Result can contain a value similar to an Option, but instead of
 containing nothing in the alternate case, they contain an
 error. Currently this is always simply a string; i.e. whenever a
 function can return an error, it returns a type derived via
-`DEFTYPE_Result_`, and if an error is to be returned at runtime, it is
+`DEFTYPE_Result`, and if an error is to be returned at runtime, it is
 a string describing the error condition.
 
 Note that C does not have exceptions (except for `longjmp` on some

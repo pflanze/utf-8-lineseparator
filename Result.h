@@ -11,7 +11,7 @@
 
 #define Result(T) Result_##T
 
-#define DEFTYPE_Result_(T)                      \
+#define DEFTYPE_Result(T)                       \
     typedef struct {                            \
         String failure;                         \
         T ok;                                   \

@@ -33,8 +33,8 @@ const size_t BufferedStream_buffersize = 4096*4;
 typedef struct { } Unit;
 #define default_Unit {}
 
-DEFTYPE_Result_(Option_u8);
-DEFTYPE_Result_(Unit);
+DEFTYPE_Result(Option_u8);
+DEFTYPE_Result(Unit);
 
 
 typedef struct {
@@ -138,7 +138,7 @@ BufferedStream fd_BufferedStream(int fd,
     };
 }
 
-DEFTYPE_Result_(BufferedStream);
+DEFTYPE_Result(BufferedStream);
 
 UNUSED static
 Result_BufferedStream open_BufferedStream(String path /* owned */,

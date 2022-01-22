@@ -15,7 +15,7 @@
 
 DEFTYPE_Option(u32);
 #define default_Option_u32
-DEFTYPE_Result_(Option_u32);
+DEFTYPE_Result(Option_u32);
 
 
 static

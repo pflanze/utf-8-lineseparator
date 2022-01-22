@@ -15,7 +15,7 @@
 
 
 
-DEFTYPE_Result_(u32);
+DEFTYPE_Result(u32);
 
 
 static
