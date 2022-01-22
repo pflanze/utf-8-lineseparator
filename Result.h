@@ -9,16 +9,18 @@
 #include "String.h"
 
 
+#define Result(T) Result_##T
+
 #define DEFTYPE_Result_(T)                      \
     typedef struct {                            \
         String failure;                         \
         T ok;                                   \
-    } Result_##T;
+    } Result(T)
 
 #define Error(T, string)                        \
-    (Result_##T) { string, default_##T }
-#define Ok(T)                                                   \
-    (Result_##T) { noString, (T)
+    (Result(T)) { string, default_##T }
+#define Ok(T)                                   \
+    (Result(T)) { noString, (T)
 #define ENDOk }
 
 #define Result_is_success(v) (!((v).failure.str))
@@ -36,7 +38,7 @@
     if (Result_is_failure(r)) {                                         \
         /* (r).failure.needs_freeing = false;                           \
            after the next line, but usually deallocated anyway */       \
-        return (Result_##T) { (r).failure, default_##T };               \
+        return (Result(T)) { (r).failure, default_##T };                \
     }
 
 /*
@@ -70,7 +72,7 @@
 
 #define PROPAGATEL_Result(label, T, r)                                  \
     if (Result_is_failure(r)) {                                         \
-        __return = (Result_##T) { (r).failure, default_##T };           \
+        __return = (Result(T)) { (r).failure, default_##T };            \
         (r).failure.needs_freeing = false;                              \
         goto label;                                                     \
     }
