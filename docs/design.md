@@ -14,6 +14,7 @@ languages:
   - Python: `Optional[int]`, `Optional[str]`
   - Haskell: `Maybe Int`, `Maybe [Char]`
   - C++: `optional<int>`, `optional<string>`
+  - Rust: `Option<i32>`, `Option<String>`
 
 C does not have that feature. There are two standard approaches for
 such containers, one is to use a single type definition with a pointer
