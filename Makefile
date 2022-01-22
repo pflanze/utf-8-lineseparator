@@ -88,7 +88,7 @@ expand: utf-8-lineseparator.E.c test.E.c
 
 
 clean:
-	rm -f $(binaries) *.profdata
+	rm -f $(binaries) *.profdata utf-8-lineseparator.E.c test.E.c
 	rm -rf ./*.profraw/
 
 .PHONY: clean runtests
