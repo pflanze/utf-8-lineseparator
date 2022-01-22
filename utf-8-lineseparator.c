@@ -36,7 +36,7 @@ int report(BufferedStream* in /* borrowed */) {
             const char *questionable =
                 (linecount == MAX3(LFcount, CRcount, CRLFcount)) ? "false" : "true";
             printf("{ \"type\": \"utf-8-failure\", \"failure\": \"%s\", \"character_position\": %li, \"line\": %li, \"column\": %li, \"line_questionable\": %s }\n",
-                   c.failure.str, // XXX Needs to be converted to json string
+                   c.err.str, // XXX Needs to be converted to json string
                    charcount + 1,
                    linecount + 1,
                    column + 1,
@@ -135,7 +135,7 @@ int main(int argc, const char**argv) {
                 // XX should this have the path in the message,
                 // already? Should there be a
                 // BufferedStream_error_message method?
-                WARN_("close: %s", r.failure.str);
+                WARN_("close: %s", r.err.str);
                 res = 1; // OK?
             }
             Result_release(r);
@@ -151,7 +151,7 @@ int main(int argc, const char**argv) {
                 // XX should this have the path in the message,
                 // already? Should there be a
                 // BufferedStream_error_message method?
-                WARN_("open: %s", r_in.failure.str);
+                WARN_("open: %s", r_in.err.str);
                 Result_release(r_in);
                 leakcheck_verify(false);
                 return 1;
@@ -160,7 +160,7 @@ int main(int argc, const char**argv) {
             int res = report(&r_in.ok);
             Result_Unit r = BufferedStream_close(&r_in.ok);
             if (Result_is_Err(r)) {
-                WARN_("close: %s", r.failure.str);
+                WARN_("close: %s", r.err.str);
                 res = 1; // OK?
             }
             Result_release(r);

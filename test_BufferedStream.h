@@ -36,7 +36,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
         // getc on write-only file handle must fail:
         TEST_ASSERT(Result_is_Err(rmc0));
         if (Result_is_Err(rmc0)) {
-            TEST_ASSERT(0 == strcmp(rmc0.failure.str,
+            TEST_ASSERT(0 == strcmp(rmc0.err.str,
                                     "getc: stream was not opened for input"));
         }
         Result_release(rmc0);
@@ -113,7 +113,7 @@ rs:
 #define CHECK(e)                                        \
     r = e;                                              \
     if (Result_is_Err(r)) {                         \
-        TEST_FAILURE_("%s", r.failure.str);             \
+        TEST_FAILURE_("%s", r.err.str);             \
         Result_release(r);                              \
     }
 

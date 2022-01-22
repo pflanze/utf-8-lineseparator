@@ -13,7 +13,7 @@
 
 #define DEFTYPE_Result(T)                       \
     typedef struct {                            \
-        String failure;                         \
+        String err;                             \
         T ok;                                   \
     } Result(T)
 
@@ -22,22 +22,22 @@
 #define Ok(T, val)                              \
     (Result(T)) { noString, val }
 
-#define Result_is_Ok(v) (!((v).failure.str))
-#define Result_is_Err(v) (!!((v).failure.str))
-// #define Result_failure_str(v) ((v).failure.str)
+#define Result_is_Ok(v) (!((v).err.str))
+#define Result_is_Err(v) (!!((v).err.str))
+// #define Result_failure_str(v) ((v).err.str)
 
 // We don't release the .ok part here as that one may have changed
 // ownership in the mean time!
 #define Result_release(v)                       \
-    String_release((v).failure)
+    String_release((v).err)
 #define Result_print_failure(fmt, v)            \
-    fprintf(stderr, fmt, (v).failure.str)
+    fprintf(stderr, fmt, (v).err.str)
 
 #define PROPAGATE_Result(T, r)                                          \
-    if (Result_is_Err(r)) {                                         \
-        /* (r).failure.needs_freeing = false;                           \
+    if (Result_is_Err(r)) {                                             \
+        /* (r).err.needs_freeing = false;                               \
            after the next line, but usually deallocated anyway */       \
-        return (Result(T)) { (r).failure, default_##T };                \
+        return (Result(T)) { (r).err, default_##T };                    \
     }
 
 /*
@@ -74,9 +74,9 @@
     return __return;
 
 #define PROPAGATEL_Result(label, T, r)                                  \
-    if (Result_is_Err(r)) {                                         \
-        __return = (Result(T)) { (r).failure, default_##T };            \
-        (r).failure.needs_freeing = false;                              \
+    if (Result_is_Err(r)) {                                             \
+        __return = (Result(T)) { (r).err, default_##T };                \
+        (r).err.needs_freeing = false;                                  \
         goto label;                                                     \
     }
 
