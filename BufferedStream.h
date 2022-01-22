@@ -269,9 +269,9 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
     if (s->is_closed) {
         return Error(Unit, literal_String("close: stream is already closed"));
     }
-    BEGINRETURN(Result_Unit);
+    BEGIN_PROPAGATE(Unit);
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
-        RETURN(Ok(Unit) {} ENDOk);
+        RETURN_Ok(Unit, {});
     }
     else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
         // First check and return on previous failure? No! Need to
@@ -295,10 +295,10 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
             // unclear!
             s->filestream.maybe_fd = FD_NOTHING;
             s->filestream.maybe_failure = strerror_String(err);
-            RETURN(Error(Unit, String_clone(&s->filestream.maybe_failure)));
+            RETURN_Error(Unit, String_clone(&s->filestream.maybe_failure));
         } else {
             s->filestream.maybe_fd = FD_NOTHING;
-            RETURN(Ok(Unit) {} ENDOk);
+            RETURN_Ok(Unit, {});
         }
     }
     else {
@@ -308,7 +308,7 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
     s->is_closed = true;
     s->buffer.slice.startpos = 0;
     s->buffer.slice.endpos = 0;
-    ENDRETURN;
+    END_PROPAGATE;
 }
 
 static

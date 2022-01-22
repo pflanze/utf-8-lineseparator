@@ -21,7 +21,7 @@ DEFTYPE_Result_(u32);
 static
 Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
                                  size_t inlen) {
-    BEGINRETURN(Result_u32);
+    BEGIN_PROPAGATE(u32);
     BufferedStream in = Buffer_to_BufferedStream(
         Buffer_from_array(false, (unsigned char*)inbuf, inlen),
         //                       ^ XX provide ConstBuffer instead?
@@ -40,7 +40,7 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
                                      "left-over data after character")));
         }
 
-        RETURN(Ok(u32) rmc.ok.value ENDOk);
+        RETURN_Ok(u32, rmc.ok.value);
     _rmc2:
         Result_release(rmc2);
     }
@@ -48,7 +48,7 @@ _rmc:
     Result_release(rmc);
     BufferedStream_close(&in);
     BufferedStream_release(&in);
-    ENDRETURN;
+    END_PROPAGATE;
 }
 
 static

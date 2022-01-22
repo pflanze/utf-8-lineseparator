@@ -46,28 +46,38 @@
   Label based cleanup handling:
 
     Result_Sometype foo() {
-        BEGINRETURN(Result_Sometype);
+        BEGIN_PROPAGATE(Sometype);
         ...
         if (bar) RETURNL(l1, val1);
         Result_foo x = givingx();
         PROPAGATEL_Result(l2, Sometype, x);
-        RETURN(val2);
+        RETURN_Ok(Sometype, val2);
      l2:
         Result_release(x);
      l1:
         cleanup1();
-        ENDRETURN;
+        END_PROPAGATE;
     }
   
 */
-#define BEGINRETURN(T)                          \
-    T __return;
+
+#define BEGIN_PROPAGATE(T)                      \
+    Result(T) __return;
+
 #define RETURNL(label, val)                      \
     __return = val;                              \
     goto label;
+
 #define RETURN(val)                             \
     __return = val;
-#define ENDRETURN                               \
+
+#define RETURN_Ok(T, val)                       \
+    __return = Ok(T) val ENDOk;
+
+#define RETURN_Error(T, err)                    \
+    __return = Error(T, err);
+
+#define END_PROPAGATE                               \
     return __return;
 
 #define PROPAGATEL_Result(label, T, r)                                  \

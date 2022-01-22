@@ -187,7 +187,7 @@ Similarly, in C it is not possible to directly `return` from a
 function when a cleanup action has to be done; to ease this case, the
 `RETURNL`, `RETURN` macros are provided; to make them work,
 `BEGINRETURN` has to precede their use and defines the type to return,
-and `ENDRETURN` needs to put at the end of the function to actually
+and `END_PROPAGATE` needs to put at the end of the function to actually
 `return` the value that `RETURNL` or `RETURN` have stored for the
 return.
 

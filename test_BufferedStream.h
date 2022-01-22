@@ -12,7 +12,7 @@
 
 static
 Result_Unit test_BufferedStream_1(TestStatistics *stats) {
-    BEGINRETURN(Result_Unit);
+    BEGIN_PROPAGATE(Unit);
 #define TBUFSIZ 90000
     unsigned char buf[TBUFSIZ];
     {
@@ -85,7 +85,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                     Result_Unit ru3 = BufferedStream_close(&rs2.ok);
                     PROPAGATEL_Result(ru3, Unit, ru3);
 
-                    RETURN(Ok(Unit) {} ENDOk);
+                    RETURN_Ok(Unit, {});
                 ru3:
                     Result_release(ru3);
                 }
@@ -106,7 +106,7 @@ rs:
     BufferedStream_close(&rs.ok); // no need to check the result here
     BufferedStream_release(&rs.ok);
     Result_release(rs);
-    ENDRETURN;
+    END_PROPAGATE;
 }
 
 
