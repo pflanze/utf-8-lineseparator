@@ -271,7 +271,7 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
     }
     BEGIN_PROPAGATE(Unit);
     if (s->stream_type == STREAM_TYPE_BUFFERSTREAM) {
-        RETURN_Ok(Unit, {});
+        RETURN(Ok(Unit) {} ENDOk);
     }
     else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
         // First check and return on previous failure? No! Need to
@@ -295,10 +295,10 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
             // unclear!
             s->filestream.maybe_fd = FD_NOTHING;
             s->filestream.maybe_failure = strerror_String(err);
-            RETURN_Error(Unit, String_clone(&s->filestream.maybe_failure));
+            RETURN(Error(Unit, String_clone(&s->filestream.maybe_failure)));
         } else {
             s->filestream.maybe_fd = FD_NOTHING;
-            RETURN_Ok(Unit, {});
+            RETURN(Ok(Unit) {} ENDOk);
         }
     }
     else {

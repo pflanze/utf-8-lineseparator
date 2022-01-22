@@ -85,7 +85,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                     Result_Unit ru3 = BufferedStream_close(&rs2.ok);
                     PROPAGATEL_Result(ru3, Unit, ru3);
 
-                    RETURN_Ok(Unit, {});
+                    RETURN(Ok(Unit) {} ENDOk);
                 ru3:
                     Result_release(ru3);
                 }

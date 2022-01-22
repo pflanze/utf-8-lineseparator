@@ -51,7 +51,7 @@
         if (bar) RETURNL(l1, val1);
         Result_foo x = givingx();
         PROPAGATEL_Result(l2, Sometype, x);
-        RETURN_Ok(Sometype, val2);
+        RETURN(Ok(Sometype) val2 ENDOk);
      l2:
         Result_release(x);
      l1:
@@ -70,12 +70,6 @@
 
 #define RETURN(val)                             \
     __return = val;
-
-#define RETURN_Ok(T, val)                       \
-    __return = Ok(T) val ENDOk;
-
-#define RETURN_Error(T, err)                    \
-    __return = Error(T, err);
 
 #define END_PROPAGATE                               \
     return __return;

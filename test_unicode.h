@@ -40,7 +40,7 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
                                      "left-over data after character")));
         }
 
-        RETURN_Ok(u32, rmc.ok.value);
+        RETURN(Ok(u32) rmc.ok.value ENDOk);
     _rmc2:
         Result_release(rmc2);
     }
