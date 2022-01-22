@@ -20,7 +20,7 @@
 #define Error(T, string)                        \
     (Result(T)) { string, default_##T }
 #define Ok(T, val)                              \
-    (Result(T)) { noString, (T) val }
+    (Result(T)) { noString, val }
 
 #define Result_is_success(v) (!((v).failure.str))
 #define Result_is_failure(v) (!!((v).failure.str))
