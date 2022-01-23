@@ -20,3 +20,6 @@
   * add AFL++ test files to test suite
   
   * show coverage after running across the whole test suite
+
+  * split the "somewhat Rust-style C" framework off
+    utf-8-lineseparator
