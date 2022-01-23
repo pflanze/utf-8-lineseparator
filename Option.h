@@ -19,9 +19,9 @@
     } Option(T);
 
 #define None(T)                                 \
-    (Option(T)) { true, XCAT(default_,T) }
+    (Option(T)) { .is_none = true }
 #define Some(T, val)                            \
-    (Option(T)) { false, val }
+    (Option(T)) { .is_none = false, .value = val }
 
 #define Option_is_some(v) (!(v).is_none)
 
