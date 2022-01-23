@@ -85,9 +85,9 @@ is taking advantage of (the include here is referring to
         const char *mystralias = ms.value;
     }
 
-When it seems unclear what code the macros generate, run `make expand`
-and look at the file with the name of the binary but with the suffix
-`.E.c` (`utf-8-lineseparator.E.c` or `test.E.c`).
+When it seems unclear what code the macros generate, compile with `-E`
+or run `make expand` and look at the file with the name of the binary
+but with the suffix `.E.c` (`utf-8-lineseparator.E.c` or `test.E.c`).
 
 Since the `DEFTYPE_Option` macro creates a new type name by simply
 appending the name of the type given as its argument to
