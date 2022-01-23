@@ -268,7 +268,10 @@ For precise checking of memory handling errors, the address sanitizer
 in production code, only during development and testing.
 
 Also, ASAN doesn't run while AFL++ does its fuzz testing, since the
-program doesn't actually exit.
+program doesn't actually exit after each test run (and when it does
+exit, it appears that the leak checker part of ASAN is disabled or
+circumvented (perhaps by exiting via `_exit`?) or its report
+swallowed).
 
 [leakcheck.h](../leakcheck.h) provides a simple and cheap means of
 testing for missed memory deallocations both in production and as part
