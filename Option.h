@@ -7,18 +7,21 @@
 #define OPTION_H_
 
 #include <stdbool.h>
+#include "macro-util.h"
 
+
+#define Option(T) XCAT(Option_,T)
 
 #define DEFTYPE_Option(T)                       \
     typedef struct {                            \
         bool is_none;                        \
         T value;                                \
-    } Option_##T;
+    } Option(T);
 
 #define None(T)                                 \
-    (Option_##T) { true, default_##T }
+    (Option(T)) { true, XCAT(default_,T) }
 #define Some(T, val)                            \
-    (Option_##T) { false, val }
+    (Option(T)) { false, val }
 
 #define Option_is_some(v) (!(v).is_none)
 
