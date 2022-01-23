@@ -61,11 +61,11 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
                     rmc = BufferedStream_getc(&s2);
                     PROPAGATE_goto(rmc, Unit, rmc);
                     if (rmc.ok.is_none) {
-                        RETURNL(rmc, Err(Unit, literal_String(
+                        RETURN_goto(rmc, Err(Unit, literal_String(
                                              "bug: file is too small")));
                     } else {
                         if (! (rmc.ok.value == buf[i])) {
-                            RETURNL(rmc, Err(
+                            RETURN_goto(rmc, Err(
                                         Unit, literal_String(
                                             "rmc.ok.value == buf[i] failed")));
                         }
@@ -74,7 +74,7 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
                 rmc = BufferedStream_getc(&s2);
                 PROPAGATE_goto(rmc, Unit, rmc);
                 if (! rmc.ok.is_none) {
-                    RETURNL(rmc, Err(Unit, literal_String(
+                    RETURN_goto(rmc, Err(Unit, literal_String(
                                          "bug: file is too large")));
                 }
 

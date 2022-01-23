@@ -48,7 +48,7 @@
     Result_Sometype foo() {
         BEGIN_PROPAGATE(Sometype);
         ...
-        if (bar) RETURNL(l1, val1);
+        if (bar) RETURN_goto(l1, val1);
         Result_foo x = givingx();
         PROPAGATE_goto(l2, Sometype, x);
         RETURN(Ok(Sometype, val2));
@@ -64,7 +64,7 @@
 #define BEGIN_PROPAGATE(T)                      \
     Result(T) __return;
 
-#define RETURNL(label, val)                      \
+#define RETURN_goto(label, val)                      \
     __return = val;                              \
     goto label;
 
