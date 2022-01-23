@@ -24,7 +24,7 @@ Result(Option(u32)) get_unicodechar(BufferedStream *in) {
 #define EBUFSIZ 256
     u32 codepoint;
     Result(Option(u8)) b1 = BufferedStream_getc(in);
-    PROPAGATE_Result(Option(u32), b1);
+    PROPAGATE_return(Option(u32), b1);
     if (b1.ok.is_none) {
         return Ok(Option(u32), None(u32));
     }
@@ -48,7 +48,7 @@ Result(Option(u32)) get_unicodechar(BufferedStream *in) {
         }
         for (int i = 1; i < numbytes; i++) {
             Result(Option(u8)) b = BufferedStream_getc(in);
-            PROPAGATE_Result(Option(u32), b);
+            PROPAGATE_return(Option(u32), b);
             if (b.ok.is_none) {
                 char msg[EBUFSIZ];
                 snprintf(msg, EBUFSIZ,

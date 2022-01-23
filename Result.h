@@ -34,7 +34,7 @@
 #define Result_print_failure(fmt, v)            \
     fprintf(stderr, fmt, (v).err.str)
 
-#define PROPAGATE_Result(T, r)                                          \
+#define PROPAGATE_return(T, r)                                          \
     if (Result_is_Err(r)) {                                             \
         /* (r).err.needs_freeing = false;                               \
            after the next line, but usually deallocated anyway */       \

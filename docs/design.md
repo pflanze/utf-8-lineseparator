@@ -178,11 +178,11 @@ towards what Rust is doing.)
 #### Error propagation
 
 When a function is returning an error via Result, the macros
-`PROPAGATE_Result` or `PROPAGATE_goto` can be used to propagate it
+`PROPAGATE_return` or `PROPAGATE_goto` can be used to propagate it
 up the call chain; meaning, to stop the evaluation of the current
 function and return the error from the current function.
 
-`PROPAGATE_Result` can be used if the function does not need to clean
+`PROPAGATE_return` can be used if the function does not need to clean
 up anything. OTOH if there are things that need to be cleaned up
 (e.g. calling some `.._release` functions), then those cleanup actions
 should be put at the end of the function (in the reverse order of the

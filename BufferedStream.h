@@ -282,7 +282,7 @@ Result(Unit) BufferedStream_close(BufferedStream *s) {
         // via `is_closed` already.)
         if (s->direction & STREAM_DIRECTION_OUT) {
             Result(Unit) r = BufferedStream_flush(s);
-            PROPAGATE_Result(Unit, r);
+            PROPAGATE_return(Unit, r);
         }
         assert(s->filestream.optional_fd != FD_NONE);
         int fd = s->filestream.optional_fd;
@@ -392,7 +392,7 @@ Result(Unit) BufferedStream_putc(BufferedStream *s, unsigned char c) {
         }
         else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
             Result(Unit) r = BufferedStream_flush(s);
-            PROPAGATE_Result(Unit, r);
+            PROPAGATE_return(Unit, r);
             return BufferedStream_putc(s, c);
         }
         else {
