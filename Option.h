@@ -14,7 +14,7 @@
 
 #define DEFTYPE_Option(T)                       \
     typedef struct {                            \
-        bool is_none;                        \
+        bool is_none;                           \
         T value;                                \
     } Option(T);
 
