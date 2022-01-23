@@ -40,5 +40,20 @@
         .data = (s).data                                         \
     }
 
+// needs #include "Slice.h" and DEFTYPE_Slice_(T)
+#define Array_Slice_unsafe(T, s, startpos, endpos)       \
+    (Slice_##T) {                                        \
+        .start = (s).data + (startpos),                  \
+        .endpos = (s).data + (endpos)                    \
+    }
+
+#define Array_Slice_safer(T, s, startpos, endpos)            \
+    (Slice_##T) {                                            \
+        .start = (assert((startpos) <= (s).length),          \
+                  (s).data + (startpos)),                    \
+        .end = (assert((endpos) <= (s).length),              \
+                (s).data + (endpos))                         \
+    }
+
 
 #endif /* ARRAY_H_ */
