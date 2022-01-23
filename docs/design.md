@@ -99,6 +99,17 @@ why `DEFTYPE_Option` defines `Option_int` as a typedef so that the
 `struct ` prefix isn't needed, so that the `Option_int` type itself be
 used as a parameter for another DEFTYPE style macro.
 
+The parameterized types `Option` and `Result` also come with macros of
+the same name that produce the type name: `Option(int)` is expanding
+to `Option_int`. This is a two-bladed sword, on one side it makes it
+visually clearer that a parameterized type is used, on the other side
+it introduces parens in type contexts, where usually in C no parens
+are used, which may look confusing and can break syntax highlighting
+somewhat. There is a script
+[bin/deparameterize](../bin/deparameterize) that expands all such
+occurrences with their macro-expanded version (currently works
+correctly in all cases, but that's not guaranteed to remain the case).
+
 <small>Note: while it is possible to produce type names via macros on
 the fly, e.g. `Option(int)`, they have to output the type name. It's
 not possible to recreate the struct on the fly anonymously, since C
