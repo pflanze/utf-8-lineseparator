@@ -118,6 +118,9 @@
         Result_release(__if_Ok_result);                 \
     } else 
 
+// ^ XX Bummer: the whole if_Ok should automatically be wrapped in a
+// new block, but can't (or does the MACRO{ } trick work here? TODO)
+
 /*
 #define if_let_Ok(T, var, expr)                         \
     __typeof__(expr) __if_Ok_result = expr;             \
