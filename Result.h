@@ -82,4 +82,68 @@
     }
 
 
+/*
+
+  Block based cleanup handling:
+
+
+    BEGIN_PROPAGATE(Bar);
+
+    if_Ok(Bar, result) {
+        ....
+        RETURN(Ok(Bar, { }));
+    }
+    // other cleanup than the result
+
+    END_PROPAGATE;
+
+  Or
+
+    BEGIN_PROPAGATE(Bar);
+
+    if_let_Ok(Bar, var, expr) {
+        ....
+        RETURN(Ok(Bar, { }));
+    }
+    // other cleanup than the result
+
+    END_PROPAGATE;
+
+*/
+
+#define if_Ok(T, expr)                                  \
+    __typeof__(expr) __if_Ok_result = expr;             \
+    if (Result_is_Err(__if_Ok_result)) {                \
+        RETURN(Err(T, __if_Ok_result.err));             \
+        Result_release(__if_Ok_result);                 \
+    } else 
+
+/*
+#define if_let_Ok(T, var, expr)                         \
+    __typeof__(expr) __if_Ok_result = expr;             \
+    if (Result_is_Err(__if_Ok_result)) {                \
+        RETURN(Err(T, __if_Ok_result.err));             \
+        Result_release(__if_Ok_result);                 \
+    } else {                                            \
+    __typeof__(__if_Ok_result.ok) var =                 \
+        __if_Ok_result.ok;                              \
+
+The problem is that we'd need a ENDif_let_Ok to close off
+the opening brace.
+
+So...:
+*/
+
+#define if_let_Ok(T, var, expr)                         \
+    __typeof__(expr) __if_Ok_result = expr;             \
+    __typeof__(__if_Ok_result.ok) var =                 \
+        __if_Ok_result.ok;                              \
+    if (Result_is_Err(__if_Ok_result)) {                \
+        RETURN(Err(T, __if_Ok_result.err));             \
+        Result_release(__if_Ok_result);                 \
+    } else
+
+// XX Bummer.
+
+
 #endif /* RESULT_H_ */
