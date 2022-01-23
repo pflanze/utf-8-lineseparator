@@ -50,7 +50,7 @@
         ...
         if (bar) RETURNL(l1, val1);
         Result_foo x = givingx();
-        PROPAGATEL_Result(l2, Sometype, x);
+        PROPAGATE_goto(l2, Sometype, x);
         RETURN(Ok(Sometype, val2));
      l2:
         Result_release(x);
@@ -74,7 +74,7 @@
 #define END_PROPAGATE                               \
     return __return;
 
-#define PROPAGATEL_Result(label, T, r)                                  \
+#define PROPAGATE_goto(label, T, r)                                  \
     if (Result_is_Err(r)) {                                             \
         __return = (Result(T)) { (r).err, XCAT(default_,T) };           \
         (r).err.needs_freeing = false;                                  \

@@ -29,7 +29,7 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
 
     Result(BufferedStream) rs = open_BufferedStream(
         literal_String(".test.out"), O_WRONLY | O_CREAT | O_TRUNC, 0666);
-    PROPAGATEL_Result(rs, Unit, rs);
+    PROPAGATE_goto(rs, Unit, rs);
 
     {
         Result(Option(u8)) rmc0 = BufferedStream_getc(&rs.ok);
@@ -46,7 +46,7 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
         Result(Unit) ru;
         for (int i = 0; i < TBUFSIZ; i++) {
             ru = BufferedStream_putc(&rs.ok, buf[i]);
-            PROPAGATEL_Result(ru, Unit, ru);
+            PROPAGATE_goto(ru, Unit, ru);
         }
 
         if_Ok(Unit, BufferedStream_close(&rs.ok)) {
@@ -59,7 +59,7 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
                 Result(Option(u8)) rmc;
                 for (int i = 0; i < TBUFSIZ; i++) {
                     rmc = BufferedStream_getc(&s2);
-                    PROPAGATEL_Result(rmc, Unit, rmc);
+                    PROPAGATE_goto(rmc, Unit, rmc);
                     if (rmc.ok.is_none) {
                         RETURNL(rmc, Err(Unit, literal_String(
                                              "bug: file is too small")));
@@ -72,7 +72,7 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
                     }
                 }
                 rmc = BufferedStream_getc(&s2);
-                PROPAGATEL_Result(rmc, Unit, rmc);
+                PROPAGATE_goto(rmc, Unit, rmc);
                 if (! rmc.ok.is_none) {
                     RETURNL(rmc, Err(Unit, literal_String(
                                          "bug: file is too large")));
@@ -80,7 +80,7 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
 
                 {
                     Result(Unit) ru3 = BufferedStream_close(&s2);
-                    PROPAGATEL_Result(ru3, Unit, ru3);
+                    PROPAGATE_goto(ru3, Unit, ru3);
 
                     RETURN(Ok(Unit, {}));
                 ru3:

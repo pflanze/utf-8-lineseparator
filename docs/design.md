@@ -178,7 +178,7 @@ towards what Rust is doing.)
 #### Error propagation
 
 When a function is returning an error via Result, the macros
-`PROPAGATE_Result` or `PROPAGATEL_Result` can be used to propagate it
+`PROPAGATE_Result` or `PROPAGATE_goto` can be used to propagate it
 up the call chain; meaning, to stop the evaluation of the current
 function and return the error from the current function.
 
@@ -188,7 +188,7 @@ up anything. OTOH if there are things that need to be cleaned up
 should be put at the end of the function (in the reverse order of the
 allocations of the things that need to be cleaned up), with labels,
 and then the label is passed as the first argument to
-`PROPAGATEL_Result`. An example can be seen in [test.c](../test.c) in
+`PROPAGATE_goto`. An example can be seen in [test.c](../test.c) in
 `buf_to_utf8_codepoint`.
 
 Similarly, in C it is not possible to directly `return` from a
