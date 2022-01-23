@@ -64,17 +64,17 @@
 #define BEGIN_PROPAGATE(T)                      \
     Result(T) __return;
 
-#define RETURN_goto(label, val)                      \
-    __return = val;                              \
+#define RETURN_goto(label, val)                 \
+    __return = val;                             \
     goto label;
 
 #define RETURN(val)                             \
     __return = val;
 
-#define END_PROPAGATE                               \
+#define END_PROPAGATE                           \
     return __return;
 
-#define PROPAGATE_goto(label, T, r)                                  \
+#define PROPAGATE_goto(label, T, r)                                     \
     if (Result_is_Err(r)) {                                             \
         __return = (Result(T)) { (r).err, XCAT(default_,T) };           \
         (r).err.needs_freeing = false;                                  \
