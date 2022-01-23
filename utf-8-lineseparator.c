@@ -44,7 +44,7 @@ int report(BufferedStream* in /* borrowed */) {
             Result_release(c);
             return 0;
         }
-        if (c.ok.is_nothing) {
+        if (c.ok.is_none) {
             break;
         }
         charcount++;

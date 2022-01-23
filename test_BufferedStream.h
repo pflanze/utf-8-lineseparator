@@ -64,7 +64,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                 for (int i = 0; i < TBUFSIZ; i++) {
                     rmc = BufferedStream_getc(&rs2.ok);
                     PROPAGATEL_Result(rmc, Unit, rmc);
-                    if (rmc.ok.is_nothing) {
+                    if (rmc.ok.is_none) {
                         RETURNL(rmc, Error(Unit, literal_String(
                                                "bug: file is too small")));
                     } else {
@@ -76,7 +76,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                 }
                 rmc = BufferedStream_getc(&rs2.ok);
                 PROPAGATEL_Result(rmc, Unit, rmc);
-                if (! rmc.ok.is_nothing) {
+                if (! rmc.ok.is_none) {
                     RETURNL(rmc, Error(Unit, literal_String(
                                            "bug: file is too large")));
                 }

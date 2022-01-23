@@ -11,7 +11,7 @@
 
 #define DEFTYPE_Option(T)                       \
     typedef struct {                            \
-        bool is_nothing;                        \
+        bool is_none;                        \
         T value;                                \
     } Option_##T;
 
@@ -20,7 +20,7 @@
 #define Some(T, val)                            \
     (Option_##T) { false, val }
 
-#define Option_is_some(v) (!(v).is_nothing)
+#define Option_is_some(v) (!(v).is_none)
 
 
 #endif /* OPTION_H_ */

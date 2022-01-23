@@ -20,7 +20,7 @@ such containers, one is to use a single type definition with a pointer
 of unknown type and then using unsafe type casting:
 
     struct Option {
-        void *maybe_value;
+        void *optional_value;
         // (no need for separate switch to indicate whether a 
         // value is contained, as the pointer can be NULL.) 
     };
@@ -29,11 +29,11 @@ of unknown type and then using unsafe type casting:
         int *myvalp = malloc(sizeof(int));
         *myvalp = 42;
         struct Option mf = { (void *)&myvalp };
-        int *myvalpalias = (int *)mf.maybe_value;
+        int *myvalpalias = (int *)mf.optional_value;
 
         const char *mystr = "foo";
         struct Option ms = { (void *)mystr };
-        const char *mystralias = (const char *)ms.maybe_value;
+        const char *mystralias = (const char *)ms.optional_value;
     }
 
 The now often required heap allocations are slow and the handling of
@@ -42,12 +42,12 @@ the pointers and the unsafe casts are sources of memory safety bugs.
 The other is defining the container for every contained type used.
 
     struct Option_int {
-        bool is_nothing;
+        bool is_none;
         int value;
     };
 
     struct Option_str {
-        bool is_nothing;
+        bool is_none;
         const char *value;
     };
 
@@ -105,7 +105,7 @@ has nominal, not structural typing (the anonymous structs would not
 match the ones created on the fly in other places, even if the type
 expression (macro call) is the same).</small>
 
-The Option types need to be checked via their `.is_nothing` attribute
+The Option types need to be checked via their `.is_none` attribute
 whether they actually contain a value.
 
 ### Result

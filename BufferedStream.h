@@ -40,12 +40,12 @@ DEFTYPE_Result_(Unit);
 typedef struct {
 } _BufferStream;
 
-#define FD_NOTHING -1
+#define FD_NONE -1
 
 typedef struct {
-    int maybe_fd; // FD_NOTHING == closed
+    int optional_fd; // FD_NONE == closed
     bool is_exhausted; // saw EOF
-    String maybe_failure; // error we saw
+    String optional_failure; // error we saw
 } _FileStream;
 
 
@@ -65,8 +65,8 @@ void assert_direction(uint8_t direction) {
 typedef struct {
     Buffer buffer;
     bool is_closed; // in which case buffer's pos == length == 0
-    bool has_path; // whether a path is given in maybe_path_or_name
-    String maybe_path_or_name;
+    bool has_path; // whether a path is given in optional_path_or_name
+    String optional_path_or_name;
     const uint8_t direction;
     const uint8_t stream_type;
     union {
@@ -79,11 +79,11 @@ typedef struct {
 
 UNUSED static
 String /* owned by receiver */ BufferedStream_name_sh(BufferedStream *s) {
-    assert(s->maybe_path_or_name.str);
+    assert(s->optional_path_or_name.str);
     if (s->has_path) {
-        return String_quote_sh(s->maybe_path_or_name.str);
+        return String_quote_sh(s->optional_path_or_name.str);
     } else {
-        return copy_String(s->maybe_path_or_name.str);
+        return copy_String(s->optional_path_or_name.str);
     }
 }
 
@@ -105,7 +105,7 @@ BufferedStream Buffer_to_BufferedStream(Buffer b /* owned */,
         .buffer = b,
         .is_closed = false,
         .has_path = false,
-        .maybe_path_or_name = name,
+        .optional_path_or_name = name,
         .direction = direction,
         .stream_type = STREAM_TYPE_BUFFERSTREAM,
         .bufferstream = {}
@@ -115,7 +115,7 @@ BufferedStream Buffer_to_BufferedStream(Buffer b /* owned */,
 UNUSED static
 BufferedStream fd_BufferedStream(int fd,
                                  uint8_t direction,
-                                 String maybe_path_or_name /* owned */,
+                                 String optional_path_or_name /* owned */,
                                  bool is_path) {
     assert(fd >= 0);
     assert_direction(direction);
@@ -127,13 +127,13 @@ BufferedStream fd_BufferedStream(int fd,
             BufferedStream_buffersize),
         .is_closed = false,
         .has_path = is_path,
-        .maybe_path_or_name = maybe_path_or_name,
+        .optional_path_or_name = optional_path_or_name,
         .direction = direction,
         .stream_type = STREAM_TYPE_FILESTREAM,
         .filestream = (_FileStream) {
-            .maybe_fd = fd,
+            .optional_fd = fd,
             .is_exhausted = false,
-            .maybe_failure = noString
+            .optional_failure = noString
         }
     };
 }
@@ -172,13 +172,13 @@ Result_BufferedStream open_BufferedStream(String path /* owned */,
                                             BufferedStream_buffersize),
                   .is_closed = false,
                   .has_path = true,
-                  .maybe_path_or_name = path,
+                  .optional_path_or_name = path,
                   .direction = direction,
                   .stream_type = STREAM_TYPE_FILESTREAM,
                   .filestream = (_FileStream) {
-                      .maybe_fd = fd,
+                      .optional_fd = fd,
                       .is_exhausted = false,
-                      .maybe_failure = noString
+                      .optional_failure = noString
                   }
               }));
 }
@@ -200,7 +200,7 @@ void BufferedStream_release(BufferedStream *s) {
         // nothing
     }
     else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
-        String_release(s->filestream.maybe_failure);
+        String_release(s->filestream.optional_failure);
     }
     else {
         DIE("invalid stream_type");
@@ -216,7 +216,7 @@ void BufferedStream_free(BufferedStream *s) {
 static
 Result_Unit _BufferedStream_filestream_flush_unsafe(BufferedStream *s) {
     assert(s->buffer.size > 0); // otherwise it would loop endlessly
-    int fd = s->filestream.maybe_fd;
+    int fd = s->filestream.optional_fd;
 retry: {
         int n = write(fd,
                       Slice_start(s->buffer.slice),
@@ -226,7 +226,7 @@ retry: {
             if (err == EINTR) {
                 goto retry;
             }
-            s->filestream.maybe_failure = strerror_String(err);
+            s->filestream.optional_failure = strerror_String(err);
             return Error(Unit, {});
         } else if ((size_t)n == Slice_length(s->buffer.slice)) {
             // done
@@ -252,7 +252,7 @@ Result_Unit BufferedStream_flush(BufferedStream *s) {
         return Ok(Unit, {});
     }
     else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
-        assert(s->filestream.maybe_fd != FD_NOTHING);
+        assert(s->filestream.optional_fd != FD_NONE);
         // Turn startpos from putc writing pos into write writing pos
         // (this is hacky) (it is being turned back to putc writing
         // pos by _BufferedStream_filestream_flush_unsafe resetting
@@ -284,21 +284,21 @@ Result_Unit BufferedStream_close(BufferedStream *s) {
             Result_Unit r = BufferedStream_flush(s);
             PROPAGATE_Result(Unit, r);
         }
-        assert(s->filestream.maybe_fd != FD_NOTHING);
-        int fd = s->filestream.maybe_fd;
+        assert(s->filestream.optional_fd != FD_NONE);
+        int fd = s->filestream.optional_fd;
     retry: 
         if (close(fd) < 0) {
             int err = errno;
             if (err == EINTR) {
                 goto retry;
             }
-            // Clear `maybe_fd`? Store the failure? XX This is a bit
+            // Clear `optional_fd`? Store the failure? XX This is a bit
             // unclear!
-            s->filestream.maybe_fd = FD_NOTHING;
-            s->filestream.maybe_failure = strerror_String(err);
-            RETURN(Error(Unit, String_clone(&s->filestream.maybe_failure)));
+            s->filestream.optional_fd = FD_NONE;
+            s->filestream.optional_failure = strerror_String(err);
+            RETURN(Error(Unit, String_clone(&s->filestream.optional_failure)));
         } else {
-            s->filestream.maybe_fd = FD_NOTHING;
+            s->filestream.optional_fd = FD_NONE;
             RETURN(Ok(Unit, {}));
         }
     }
@@ -333,16 +333,16 @@ Result_Option_u8 BufferedStream_getc(BufferedStream *s) {
         else if (s->stream_type == STREAM_TYPE_FILESTREAM) {
             if (s->filestream.is_exhausted) {
                 return Ok(Option_u8, None(u8));
-            } else if (s->filestream.maybe_failure.str) {
+            } else if (s->filestream.optional_failure.str) {
                 // return previously seen failure (OK?)
                 return (Result_Option_u8) {
-                    String_clone(&s->filestream.maybe_failure),
+                    String_clone(&s->filestream.optional_failure),
                     None(u8)
                 };
             } else {
                 // replenish the buffer
-                assert(s->filestream.maybe_fd != FD_NOTHING);
-                int fd = s->filestream.maybe_fd;
+                assert(s->filestream.optional_fd != FD_NONE);
+                int fd = s->filestream.optional_fd;
             retry: {
                     int n = read(fd, s->buffer.slice.data, s->buffer.size);
                     if (n < 0) {
@@ -350,9 +350,9 @@ Result_Option_u8 BufferedStream_getc(BufferedStream *s) {
                         if (err == EINTR) {
                             goto retry;
                         }
-                        s->filestream.maybe_failure = strerror_String(err);
+                        s->filestream.optional_failure = strerror_String(err);
                         /* return (Result_Option_u8) { */
-                        /*     String_clone(&s->filestream.maybe_failure), */
+                        /*     String_clone(&s->filestream.optional_failure), */
                         /*     None(u8) */
                         /* }; */
                     } else if (n == 0) {

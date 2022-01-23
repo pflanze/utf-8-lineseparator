@@ -25,7 +25,7 @@ Result_Option_u32 get_unicodechar(BufferedStream *in) {
     u32 codepoint;
     Result_Option_u8 b1 = BufferedStream_getc(in);
     PROPAGATE_Result(Option_u32, b1);
-    if (b1.ok.is_nothing) {
+    if (b1.ok.is_none) {
         return Ok(Option_u32, None(u32));
     }
     if ((b1.ok.value & 128) == 0) {
@@ -49,7 +49,7 @@ Result_Option_u32 get_unicodechar(BufferedStream *in) {
         for (int i = 1; i < numbytes; i++) {
             Result_Option_u8 b = BufferedStream_getc(in);
             PROPAGATE_Result(Option_u32, b);
-            if (b.ok.is_nothing) {
+            if (b.ok.is_none) {
                 char msg[EBUFSIZ];
                 snprintf(msg, EBUFSIZ,
                          "premature EOF decoding UTF-8 (byte #%i)",
