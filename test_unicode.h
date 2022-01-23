@@ -19,7 +19,7 @@ DEFTYPE_Result(u32);
 
 
 static
-Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
+Result(u32) buf_to_utf8_codepoint(const unsigned char *inbuf,
                                  size_t inlen) {
     BEGIN_PROPAGATE(u32);
     BufferedStream in = Buffer_to_BufferedStream(
@@ -27,13 +27,13 @@ Result_u32 buf_to_utf8_codepoint(const unsigned char *inbuf,
         //                       ^ XX provide ConstBuffer instead?
         STREAM_DIRECTION_IN,
         literal_String("buf"));
-    Result_Option_u32 rmc = get_unicodechar(&in);
+    Result(Option(u32)) rmc = get_unicodechar(&in);
     PROPAGATEL_Result(_rmc, u32, rmc);
     if (rmc.ok.is_none) {
         RETURNL(_rmc, Err(u32, literal_String("premature EOF")));
     }
     {
-        Result_Option_u32 rmc2 = get_unicodechar(&in);
+        Result(Option(u32)) rmc2 = get_unicodechar(&in);
         PROPAGATEL_Result(_rmc2, u32, rmc2);
         if (! rmc2.ok.is_none) {
             RETURNL(_rmc2, Err(u32, literal_String(
@@ -58,7 +58,7 @@ void t_utf8_equal_codepoint(u32 codepoint,
                             const char *sourcefile,
                             int sourceline,
                             TestStatistics *stats) {
-    Result_u32 rc =
+    Result(u32) rc =
         buf_to_utf8_codepoint(buf, buflen);
     if (Result_is_Err(rc)) {
         WARN_("*** Error running test: %s at %s:%i",
@@ -117,7 +117,7 @@ void test_unicode(TestStatistics *stats) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnarrowing"
                         const unsigned char buf[] = { i0, i1, i2, i3 };
-                        Result_u32 rc = buf_to_utf8_codepoint(
+                        Result(u32) rc = buf_to_utf8_codepoint(
                             buf, sizeof(buf));
                         // if (Result_is_Ok(rc)) ...
                         Result_release(rc);

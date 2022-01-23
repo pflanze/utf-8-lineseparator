@@ -70,7 +70,7 @@ void Buffer_release(Buffer *b) {
 }
 
 static
-Option_u8 Buffer_getc(Buffer *b) {
+Option(u8) Buffer_getc(Buffer *b) {
     if (Slice_is_empty(b->slice)) {
         return None(u8);
     } else {

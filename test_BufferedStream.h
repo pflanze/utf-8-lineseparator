@@ -11,7 +11,7 @@
 
 
 static
-Result_Unit test_BufferedStream_1(TestStatistics *stats) {
+Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
     BEGIN_PROPAGATE(Unit);
 #define TBUFSIZ 90000
     unsigned char buf[TBUFSIZ];
@@ -27,12 +27,12 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
         }
     }
 
-    Result_BufferedStream rs = open_BufferedStream(
+    Result(BufferedStream) rs = open_BufferedStream(
         literal_String(".test.out"), O_WRONLY | O_CREAT | O_TRUNC, 0666);
     PROPAGATEL_Result(rs, Unit, rs);
 
     {
-        Result_Option_u8 rmc0 = BufferedStream_getc(&rs.ok);
+        Result(Option(u8)) rmc0 = BufferedStream_getc(&rs.ok);
         // getc on write-only file handle must fail:
         TEST_ASSERT(Result_is_Err(rmc0));
         if (Result_is_Err(rmc0)) {
@@ -43,24 +43,24 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
     }
 
     {
-        Result_Unit ru;
+        Result(Unit) ru;
         for (int i = 0; i < TBUFSIZ; i++) {
             ru = BufferedStream_putc(&rs.ok, buf[i]);
             PROPAGATEL_Result(ru, Unit, ru);
         }
 
         {
-            Result_Unit ru2 = BufferedStream_close(&rs.ok);
+            Result(Unit) ru2 = BufferedStream_close(&rs.ok);
             PROPAGATEL_Result(ru2, Unit, ru2);
 
             // Now read back and compare:
 
             {
-                Result_BufferedStream rs2 = open_r_BufferedStream(
+                Result(BufferedStream) rs2 = open_r_BufferedStream(
                     literal_String(".test.out"));
                 PROPAGATEL_Result(rs2, Unit, rs2);
 
-                Result_Option_u8 rmc;
+                Result(Option(u8)) rmc;
                 for (int i = 0; i < TBUFSIZ; i++) {
                     rmc = BufferedStream_getc(&rs2.ok);
                     PROPAGATEL_Result(rmc, Unit, rmc);
@@ -82,7 +82,7 @@ Result_Unit test_BufferedStream_1(TestStatistics *stats) {
                 }
 
                 {
-                    Result_Unit ru3 = BufferedStream_close(&rs2.ok);
+                    Result(Unit) ru3 = BufferedStream_close(&rs2.ok);
                     PROPAGATEL_Result(ru3, Unit, ru3);
 
                     RETURN(Ok(Unit, {}));
@@ -121,7 +121,7 @@ rs:
 static
 void test_BufferedStream(TestStatistics *stats) {
 
-    Result_Unit r;
+    Result(Unit) r;
 
     CHECK(test_BufferedStream_1(stats));
 }
