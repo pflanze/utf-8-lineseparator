@@ -103,12 +103,18 @@ The parameterized types `Option` and `Result` also come with macros of
 the same name that produce the type name: `Option(int)` is expanding
 to `Option_int`. This is a two-bladed sword, on one side it makes it
 visually clearer that a parameterized type is used, on the other side
-it introduces parens in type contexts, where usually in C no parens
-are used, which may look confusing and can break syntax highlighting
-somewhat. There is a script
-[bin/deparameterize](../bin/deparameterize) that expands all such
+it introduces parens in type contexts, where usually in C none are
+used, which may look confusing and can break syntax highlighting
+somewhat. Also, there's no visual distinction between *value*
+constructors that are implemented as macros like `None(SomeType)` and
+*type* constructors like `Option(SomeType)`, and the potential for
+conflict for parameterized types which are not sum types (as that is
+what makes `Option` not have a constructor of the same name). In other
+words, this has not been thought through yet. There is a script
+[bin/deparameterize](../bin/deparameterize) that replaces all such
 occurrences with their macro-expanded version (currently works
-correctly in all cases, but that's not guaranteed to remain the case).
+correctly in all cases, but given that it's not a proper C parser
+that's not guaranteed to remain the case).
 
 <small>Note: while it is possible to produce type names via macros on
 the fly, e.g. `Option(int)`, they have to output the type name. It's
