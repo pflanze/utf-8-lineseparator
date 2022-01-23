@@ -1,0 +1,102 @@
+#!/usr/bin/env perl
+
+my $copyright= <<'COPYRIGHT';
+# Copyright 2022 by Christian Jaeger <ch@christianjaeger.ch>
+# Published under the terms of the MIT license
+COPYRIGHT
+
+use strict;
+use utf8;
+use warnings;
+use warnings FATAL => 'uninitialized';
+use experimental 'signatures';
+
+use Getopt::Long;
+# use FP::Repl::Trap; #
+
+my ($email_full)= $copyright=~ / by ([^\n]*)/s;
+
+my ($mydir, $myname);
+BEGIN {
+    $0=~ /(.*?)([^\/]+)\z/s or die "?";
+    ($mydir, $myname)=($1,$2);
+}
+
+sub usage {
+    print STDERR map{"$_\n"} @_ if @_;
+    print "$myname (file(s))
+
+  Expand Result(Option(Foo)) to Result_Option_Foo in the given files,
+  or, if none given, all .c and .h files in the current Git
+  repository.
+
+  ($email_full)
+";
+exit (@_ ? 1 : 0);
+}
+
+our $verbose=0;
+#our $opt_dry;
+GetOptions("verbose"=> \$verbose,
+	   "help"=> sub{usage},
+	   #"dry-run"=> \$opt_dry,
+	   ) or exit 1;
+
+
+# hack
+my $re_parambalanced_0 = qr/[^()]*/;
+my $re_parambalanced_1 = qr/[^()]*\([^()]*\)[^()]*/;
+my $re_parambalanced_2 = qr/[^()]*\($re_parambalanced_1\)[^()]*/;
+my $re_parambalanced = qr/$re_parambalanced_0|$re_parambalanced_1|$re_parambalanced_2/;
+
+sub translate($str) {
+    $str=~ s/[()\s]/ /sg;
+    $str=~ s/ +/_/sg;
+    $str=~ s/_+\z//s;
+    $str
+}
+
+sub deparameterize($file) {
+    if ($file =~ m{(^|/)(Option|Result)\.[ch]$}) {
+        # those files need to be left alone
+        return 0;
+    }
+    
+    my $str = do {
+        open my $in, "<", $file or die "opening '$file': $!";
+        local $/;
+        my $str= <$in>;
+        close $in or die $!;
+        $str
+    };
+
+    my $n = 0;
+    $n += $str=~ s/(\bOption\s*\($re_parambalanced\))/translate($1)/sge;
+    $n += $str=~ s/(\bResult\s*\($re_parambalanced\))/translate($1)/sge;
+
+    open my $out, ">", $file or die $!;
+    print $out $str or die $!;
+    close $out or die $!;
+
+    $n
+}
+
+my @files;
+if (@ARGV) {
+    @files = @ARGV;
+} else {
+    @files = split /\n/, `git ls-files | egrep '\\.(c|h)\$'`;
+}
+
+my ($nfiles, $nreplacements) = (0,0);
+for my $file (@files) {
+    $nfiles++;
+    $nreplacements += deparameterize($file);
+}
+
+print "Carried out $nreplacements replacements in $nfiles files.\n";
+
+#use FP::Repl; repl;
+#use Chj::ruse;
+#use Chj::Backtrace; 
+
