@@ -28,14 +28,11 @@
 
 #define Result_is_Ok(v) (!((v).is_err))
 #define Result_is_Err(v) ((v).is_err)
-// #define Result_failure_str(v) ((v).err.str)
 
 // We don't release the .ok part here as that one may have changed
 // ownership in the mean time!
 #define Result_release(v)                       \
     if (Result_is_Err(v)) String_release((v).err)
-#define Result_print_failure(fmt, v)            \
-    fprintf(stderr, fmt, (v).err.str)
 
 #define PROPAGATE_return(T, r)                                          \
     if (Result_is_Err(r)) {                                             \

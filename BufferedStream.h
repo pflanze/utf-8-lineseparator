@@ -349,10 +349,6 @@ Result(Option(u8)) BufferedStream_getc(BufferedStream *s) {
                             goto retry;
                         }
                         s->filestream.optional_failure = strerror_String(err);
-                        /* return (Result(Option(u8))) { */
-                        /*     String_clone(&s->filestream.optional_failure), */
-                        /*     None(u8) */
-                        /* }; */
                     } else if (n == 0) {
                         // EOF
                         s->filestream.is_exhausted = true;
