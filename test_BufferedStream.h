@@ -49,20 +49,16 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
             PROPAGATEL_Result(ru, Unit, ru);
         }
 
-        {
-            Result(Unit) ru2 = BufferedStream_close(&rs.ok);
-            PROPAGATEL_Result(ru2, Unit, ru2);
-
+        if_Ok(Unit, BufferedStream_close(&rs.ok)) {
             // Now read back and compare:
 
-            {
-                Result(BufferedStream) rs2 = open_r_BufferedStream(
-                    literal_String(".test.out"));
-                PROPAGATEL_Result(rs2, Unit, rs2);
+            if_let_Ok(Unit,
+                      s2, open_r_BufferedStream(
+                          literal_String(".test.out"))) {
 
                 Result(Option(u8)) rmc;
                 for (int i = 0; i < TBUFSIZ; i++) {
-                    rmc = BufferedStream_getc(&rs2.ok);
+                    rmc = BufferedStream_getc(&s2);
                     PROPAGATEL_Result(rmc, Unit, rmc);
                     if (rmc.ok.is_none) {
                         RETURNL(rmc, Err(Unit, literal_String(
@@ -74,7 +70,7 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
                         }
                     }
                 }
-                rmc = BufferedStream_getc(&rs2.ok);
+                rmc = BufferedStream_getc(&s2);
                 PROPAGATEL_Result(rmc, Unit, rmc);
                 if (! rmc.ok.is_none) {
                     RETURNL(rmc, Err(Unit, literal_String(
@@ -82,7 +78,7 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
                 }
 
                 {
-                    Result(Unit) ru3 = BufferedStream_close(&rs2.ok);
+                    Result(Unit) ru3 = BufferedStream_close(&s2);
                     PROPAGATEL_Result(ru3, Unit, ru3);
 
                     RETURN(Ok(Unit, {}));
@@ -91,13 +87,9 @@ Result(Unit) test_BufferedStream_1(TestStatistics *stats) {
                 }
             rmc:
                 Result_release(rmc);
-                BufferedStream_close(&rs2.ok);
-                BufferedStream_release(&rs2.ok);
-            rs2:
-                Result_release(rs2);
+                BufferedStream_close(&s2);
+                BufferedStream_release(&s2);
             }
-        ru2:
-            Result_release(ru2);
         }
     ru:
         Result_release(ru);

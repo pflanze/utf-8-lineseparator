@@ -27,25 +27,23 @@ Result(u32) buf_to_utf8_codepoint(const unsigned char *inbuf,
         //                       ^ XX provide ConstBuffer instead?
         STREAM_DIRECTION_IN,
         literal_String("buf"));
-    Result(Option(u32)) rmc = get_unicodechar(&in);
-    PROPAGATEL_Result(_rmc, u32, rmc);
-    if (rmc.ok.is_none) {
-        RETURNL(_rmc, Err(u32, literal_String("premature EOF")));
-    }
-    {
-        Result(Option(u32)) rmc2 = get_unicodechar(&in);
-        PROPAGATEL_Result(_rmc2, u32, rmc2);
-        if (! rmc2.ok.is_none) {
-            RETURNL(_rmc2, Err(u32, literal_String(
-                                     "left-over data after character")));
+    if_let_Ok(u32,
+              mc, get_unicodechar(&in)) {
+        if (mc.is_none) {
+            RETURN(Err(u32, literal_String("premature EOF")));
+        } else {
+            if_let_Ok(u32,
+                      mc2, get_unicodechar(&in)) {
+                if (mc2.is_none) {
+                    RETURN(Ok(u32, mc.value));
+                } else {
+                    RETURN(Err(u32, literal_String(
+                                   "left-over data after character")));
+                }
+            }
         }
-
-        RETURN(Ok(u32, rmc.ok.value));
-    _rmc2:
-        Result_release(rmc2);
     }
-_rmc:
-    Result_release(rmc);
+    
     BufferedStream_close(&in);
     BufferedStream_release(&in);
     END_PROPAGATE;
