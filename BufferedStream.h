@@ -219,8 +219,8 @@ Result(Unit) _BufferedStream_filestream_flush_unsafe(BufferedStream *s) {
     int fd = s->filestream.optional_fd;
 retry: {
         int n = write(fd,
-                      Slice_start(s->buffer.slice),
-                      Slice_length(s->buffer.slice));
+                      LSlice_start(s->buffer.slice),
+                      LSlice_length(s->buffer.slice));
         if (n < 0) {
             int err = errno;
             if (err == EINTR) {
@@ -228,7 +228,7 @@ retry: {
             }
             s->filestream.optional_failure = strerror_String(err);
             return Err(Unit, {});
-        } else if ((size_t)n == Slice_length(s->buffer.slice)) {
+        } else if ((size_t)n == LSlice_length(s->buffer.slice)) {
             // done
             s->buffer.slice.startpos = 0;
             s->buffer.slice.endpos = 0;

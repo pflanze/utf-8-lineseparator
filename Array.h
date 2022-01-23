@@ -25,19 +25,19 @@
 #define Array_T(s)                              \
     __typeof__((s).data[0])
 
-// needs #include "Slice.h" and DEFTYPE_Slice_(T)
-#define Array_Slice_unsafe(T, s, startpos, endpos)      \
-    (Slice_##T) {                                       \
-        .startpos = startpos,                           \
-        .endpos = endpos,                               \
-        .data = (s).data                                \
+// needs #include "LSlice.h" and DEFTYPE_LSlice_(T)
+#define Array_LSlice_unsafe(T, s, startpos, endpos)      \
+    (LSlice_##T) {                                       \
+        .startpos = startpos,                            \
+        .endpos = endpos,                                \
+        .data = (s).data                                 \
     }
 
-#define Array_Slice_safer(T, s, startpos, endpos)               \
-    (Slice_##T) {                                               \
-        .startpos = (assert(startpos <= (s).length), startpos), \
-        .endpos = (assert(endpos <= (s).length), endpos)        \
-        .data = (s).data                                        \
+#define Array_LSlice_safer(T, s, startpos, endpos)               \
+    (LSlice_##T) {                                               \
+        .startpos = (assert(startpos <= (s).length), startpos),  \
+        .endpos = (assert(endpos <= (s).length), endpos)         \
+        .data = (s).data                                         \
     }
 
 

@@ -11,19 +11,19 @@
 
 #include "shorttypenames.h"
 #include "Option.h"
-#include "Slice.h"
+#include "LSlice.h"
 #include "util.h" /* UNUSED */
 
 
 DEFTYPE_Option(u8);
 #define default_Option_u8 {}
 
-DEFTYPE_Slice_(u8);
+DEFTYPE_LSlice_(u8);
 
 
 typedef struct {
-    // slightly mis-using Slice here
-    Slice_u8 slice; // the unused (read or unwritten) data
+    // slightly mis-using LSlice here
+    LSlice_u8 slice; // the unused (read or unwritten) data
     /* const */ size_t size; // the size of the data in slice
     bool needs_freeing; // whether the data in slice needs to be freed
 } Buffer;
@@ -38,7 +38,7 @@ void Buffer_assert(Buffer *s) {
 static UNUSED
 Buffer Buffer_from_array(bool needs_freeing, unsigned char *array, size_t size) {
     return (Buffer) {
-        .slice = (Slice_u8) {
+        .slice = (LSlice_u8) {
             .startpos = 0,
             .endpos = size,
             .data = array
@@ -54,7 +54,7 @@ Buffer Buffer_from_array(bool needs_freeing, unsigned char *array, size_t size) 
 static UNUSED
 Buffer Buffer_from_buf(bool needs_freeing, unsigned char *buf, size_t size) {
     return (Buffer) {
-        .slice = (Slice_u8) {
+        .slice = (LSlice_u8) {
             .startpos = 0,
             .endpos = 0,
             .data = buf
@@ -71,10 +71,10 @@ void Buffer_release(Buffer *b) {
 
 static
 Option(u8) Buffer_getc(Buffer *b) {
-    if (Slice_is_empty(b->slice)) {
+    if (LSlice_is_empty(b->slice)) {
         return None(u8);
     } else {
-        return Some(u8, Slice_get_unsafe(b->slice));
+        return Some(u8, LSlice_get_unsafe(b->slice));
     }
 }
 
