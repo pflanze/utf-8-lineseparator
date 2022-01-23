@@ -79,6 +79,15 @@ check: runtests
 
 checkgdb: runtestsgdb
 
+checkall:
+	make clean
+	CC=gcc make all check
+	make clean
+	CC=g++ make all check
+	make clean
+	CC=clang make all check
+	make clean
+	make all check
 
 %.E: %.c
 	$(compile) -E -o $@ $<
@@ -91,4 +100,5 @@ clean:
 	rm -f $(binaries) *.profdata utf-8-lineseparator.E.c test.E.c
 	rm -rf ./*.profraw/
 
-.PHONY: clean runtests
+.PHONY: clean runtests checkall
+
