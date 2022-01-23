@@ -105,8 +105,8 @@ rs:
 
 #define CHECK(e)                                        \
     r = e;                                              \
-    if (Result_is_Err(r)) {                         \
-        TEST_FAILURE_("%s", r.err.str);             \
+    if (Result_is_Err(r)) {                             \
+        TEST_FAILURE_("%s", r.err.str);                 \
         Result_release(r);                              \
     }
 
