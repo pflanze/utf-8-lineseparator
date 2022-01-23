@@ -7,9 +7,10 @@
 #define RESULT_H_
 
 #include "String.h"
+#include "macro-util.h"
 
 
-#define Result(T) Result_##T
+#define Result(T) XCAT(Result_,T)
 
 #define DEFTYPE_Result(T)                       \
     typedef struct {                            \
@@ -17,8 +18,8 @@
         T ok;                                   \
     } Result(T)
 
-#define Err(T, string)                        \
-    (Result(T)) { string, default_##T }
+#define Err(T, string)                          \
+    (Result(T)) { string, XCAT(default_,T) }
 #define Ok(T, val)                              \
     (Result(T)) { noString, val }
 
@@ -37,7 +38,7 @@
     if (Result_is_Err(r)) {                                             \
         /* (r).err.needs_freeing = false;                               \
            after the next line, but usually deallocated anyway */       \
-        return (Result(T)) { (r).err, default_##T };                    \
+        return (Result(T)) { (r).err, XCAT(default_,T) };               \
     }
 
 /*
@@ -75,7 +76,7 @@
 
 #define PROPAGATEL_Result(label, T, r)                                  \
     if (Result_is_Err(r)) {                                             \
-        __return = (Result(T)) { (r).err, default_##T };                \
+        __return = (Result(T)) { (r).err, XCAT(default_,T) };           \
         (r).err.needs_freeing = false;                                  \
         goto label;                                                     \
     }
