@@ -11,9 +11,10 @@ else
   endif
 endif
 
-CFLAGS ?= -Wall -gdwarf-4 -g3 $(OPT) $(STD) -fdiagnostics-color=always
-compile = $(CC) -DAFL=0 $(CFLAGS)
+CFLAGS ?= -Wall -gdwarf-4 -g3 $(OPT) -fdiagnostics-color=always
+compile = $(CC) $(STD) -DAFL=0 $(CFLAGS)
 AFL_CLANG_FAST ?= afl-clang-fast
+compileafl = $(AFL_CLANG_FAST) -DAFL=1 $(CFLAGS)
 
 # For *cov* targets, using
 # https://clang.llvm.org/docs/SourceBasedCodeCoverage.html :
@@ -34,16 +35,16 @@ utf-8-lineseparator.san: utf-8-lineseparator.c $(headers)
 san: utf-8-lineseparator.san
 
 utf-8-lineseparator.afl: utf-8-lineseparator.c $(headers)
-	$(AFL_CLANG_FAST) $(CFLAGS) -DAFL=1 -o utf-8-lineseparator.afl utf-8-lineseparator.c
+	$(compileafl) -o utf-8-lineseparator.afl utf-8-lineseparator.c
 
 utf-8-lineseparator.aflsan: utf-8-lineseparator.c $(headers)
-	$(AFL_CLANG_FAST) $(CFLAGS) $(SAN) -DAFL=1 -o utf-8-lineseparator.aflsan utf-8-lineseparator.c
+	$(compileafl) $(SAN) -o utf-8-lineseparator.aflsan utf-8-lineseparator.c
 
 utf-8-lineseparator.cov: utf-8-lineseparator.c $(headers)
 	$(CLANG) $(CFLAGS) $(COVFLAGS) -DAFL=0 -o utf-8-lineseparator.cov utf-8-lineseparator.c
 
 utf-8-lineseparator.aflcov: utf-8-lineseparator.c $(headers)
-	$(AFL_CLANG_FAST) $(CFLAGS) $(COVFLAGS) -DAFL=1 -o utf-8-lineseparator.aflcov utf-8-lineseparator.c
+	$(compileafl) $(COVFLAGS) -o utf-8-lineseparator.aflcov utf-8-lineseparator.c
 
 test: test.c $(headers)
 	$(compile) -o test test.c
