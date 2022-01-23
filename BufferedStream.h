@@ -335,10 +335,8 @@ Result(Option(u8)) BufferedStream_getc(BufferedStream *s) {
                 return Ok(Option(u8), None(u8));
             } else if (s->filestream.optional_failure.str) {
                 // return previously seen failure (OK?)
-                return (Result(Option(u8))) {
-                    String_clone(&s->filestream.optional_failure),
-                    None(u8)
-                };
+                return Err(Option(u8),
+                           String_clone(&s->filestream.optional_failure));
             } else {
                 // replenish the buffer
                 assert(s->filestream.optional_fd != FD_NONE);

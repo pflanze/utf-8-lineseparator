@@ -14,23 +14,26 @@
 
 #define DEFTYPE_Result(T)                       \
     typedef struct {                            \
-        String err;                             \
-        T ok;                                   \
+        bool is_err;                            \
+        union {                                 \
+            String err;                         \
+            T ok;                               \
+        };                                      \
     } Result(T)
 
 #define Err(T, string)                          \
-    (Result(T)) { string, XCAT(default_,T) }
+    (Result(T)) { .is_err = true, .err = string }
 #define Ok(T, val)                              \
-    (Result(T)) { noString, val }
+    (Result(T)) { .is_err = false, .ok = val }
 
-#define Result_is_Ok(v) (!((v).err.str))
-#define Result_is_Err(v) (!!((v).err.str))
+#define Result_is_Ok(v) (!((v).is_err))
+#define Result_is_Err(v) ((v).is_err)
 // #define Result_failure_str(v) ((v).err.str)
 
 // We don't release the .ok part here as that one may have changed
 // ownership in the mean time!
 #define Result_release(v)                       \
-    String_release((v).err)
+    if (Result_is_Err(v)) String_release((v).err)
 #define Result_print_failure(fmt, v)            \
     fprintf(stderr, fmt, (v).err.str)
 
@@ -38,8 +41,9 @@
     if (Result_is_Err(r)) {                                             \
         /* (r).err.needs_freeing = false;                               \
            after the next line, but usually deallocated anyway */       \
-        return (Result(T)) { (r).err, XCAT(default_,T) };               \
+        return Err(T, (r).err);                                         \
     }
+
 
 /*
 
@@ -76,7 +80,7 @@
 
 #define PROPAGATE_goto(label, T, r)                                     \
     if (Result_is_Err(r)) {                                             \
-        __return = (Result(T)) { (r).err, XCAT(default_,T) };           \
+        __return = Err(T, (r).err);                                     \
         (r).err.needs_freeing = false;                                  \
         goto label;                                                     \
     }
