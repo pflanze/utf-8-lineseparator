@@ -57,6 +57,9 @@ Just tooling, so far:
   [chj-bin](https://github.com/pflanze/chj-bin) (could be simplified
   or replaced, I'm just used to it).
 
+- For the `make expand` target: clang-format (package of the same name
+  in Debian).
+
 ## Build
 
 The production executable is `utf-8-lineseparator`, built via `make`.
