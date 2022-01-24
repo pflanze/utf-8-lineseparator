@@ -219,8 +219,8 @@ Result(Unit) _BufferedStream_filestream_flush_unsafe(BufferedStream *s) {
     int fd = s->filestream.optional_fd;
 retry: {
         int n = write(fd,
-                      LSlice_start(s->buffer.slice),
-                      LSlice_length(s->buffer.slice));
+                      LSlice_start(s->buffer.lslice),
+                      LSlice_length(s->buffer.lslice));
         if (n < 0) {
             int err = errno;
             if (err == EINTR) {
@@ -228,16 +228,16 @@ retry: {
             }
             s->filestream.optional_failure = strerror_String(err);
             return Err(Unit, {});
-        } else if ((size_t)n == LSlice_length(s->buffer.slice)) {
+        } else if ((size_t)n == LSlice_length(s->buffer.lslice)) {
             // done
-            s->buffer.slice.startpos = 0;
-            s->buffer.slice.endpos = 0;
+            s->buffer.lslice.startpos = 0;
+            s->buffer.lslice.endpos = 0;
             return Ok(Unit, {});
         } else {
             // partial write
-            s->buffer.slice.startpos += n;
-            assert(s->buffer.slice.startpos <=
-                   s->buffer.slice.endpos);
+            s->buffer.lslice.startpos += n;
+            assert(s->buffer.lslice.startpos <=
+                   s->buffer.lslice.endpos);
             goto retry;
         }
     }
@@ -256,8 +256,8 @@ Result(Unit) BufferedStream_flush(BufferedStream *s) {
         // Turn startpos from putc writing pos into write writing pos
         // (this is hacky) (it is being turned back to putc writing
         // pos by _BufferedStream_filestream_flush_unsafe resetting
-        // the slice to positions 0,0):
-        s->buffer.slice.startpos = 0;
+        // the lslice to positions 0,0):
+        s->buffer.lslice.startpos = 0;
         return _BufferedStream_filestream_flush_unsafe(s);
     }
     else {
@@ -307,8 +307,8 @@ Result(Unit) BufferedStream_close(BufferedStream *s) {
     }
     // on RETURN:
     s->is_closed = true;
-    s->buffer.slice.startpos = 0;
-    s->buffer.slice.endpos = 0;
+    s->buffer.lslice.startpos = 0;
+    s->buffer.lslice.endpos = 0;
     END_PROPAGATE;
 }
 
@@ -342,7 +342,7 @@ Result(Option(u8)) BufferedStream_getc(BufferedStream *s) {
                 assert(s->filestream.optional_fd != FD_NONE);
                 int fd = s->filestream.optional_fd;
             retry: {
-                    int n = read(fd, s->buffer.slice.data, s->buffer.size);
+                    int n = read(fd, s->buffer.lslice.data, s->buffer.size);
                     if (n < 0) {
                         int err = errno;
                         if (err == EINTR) {
@@ -354,8 +354,8 @@ Result(Option(u8)) BufferedStream_getc(BufferedStream *s) {
                         s->filestream.is_exhausted = true;
                         //return Ok(Option(u8), None(u8));
                     } else {
-                        s->buffer.slice.startpos = 0;
-                        s->buffer.slice.endpos = n;
+                        s->buffer.lslice.startpos = 0;
+                        s->buffer.lslice.endpos = n;
                     }
                     return BufferedStream_getc(s);
                 }

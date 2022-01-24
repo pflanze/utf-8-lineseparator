@@ -23,22 +23,22 @@ DEFTYPE_LSlice_(u8);
 
 typedef struct {
     // slightly mis-using LSlice here
-    LSlice_u8 slice; // the unused (read or unwritten) data
-    /* const */ size_t size; // the size of the data in slice
-    bool needs_freeing; // whether the data in slice needs to be freed
+    LSlice_u8 lslice; // the unused (read or unwritten) data
+    /* const */ size_t size; // the size of the data in lslice
+    bool needs_freeing; // whether the data in lslice needs to be freed
 } Buffer;
 
 static
 void Buffer_assert(Buffer *s) {
-    assert(s->slice.endpos <= s->size);
-    assert(s->slice.startpos <= s->slice.endpos);
-    assert(s->slice.data);
+    assert(s->lslice.endpos <= s->size);
+    assert(s->lslice.startpos <= s->lslice.endpos);
+    assert(s->lslice.data);
 }
 
 static UNUSED
 Buffer Buffer_from_array(bool needs_freeing, unsigned char *array, size_t size) {
     return (Buffer) {
-        .slice = (LSlice_u8) {
+        .lslice = (LSlice_u8) {
             .startpos = 0,
             .endpos = size,
             .data = array
@@ -54,7 +54,7 @@ Buffer Buffer_from_array(bool needs_freeing, unsigned char *array, size_t size) 
 static UNUSED
 Buffer Buffer_from_buf(bool needs_freeing, unsigned char *buf, size_t size) {
     return (Buffer) {
-        .slice = (LSlice_u8) {
+        .lslice = (LSlice_u8) {
             .startpos = 0,
             .endpos = 0,
             .data = buf
@@ -66,29 +66,29 @@ Buffer Buffer_from_buf(bool needs_freeing, unsigned char *buf, size_t size) {
 
 static
 void Buffer_release(Buffer *b) {
-    if (b->needs_freeing) free(b->slice.data);
+    if (b->needs_freeing) free(b->lslice.data);
 }
 
 static
 Option(u8) Buffer_getc(Buffer *b) {
-    if (LSlice_is_empty(b->slice)) {
+    if (LSlice_is_empty(b->lslice)) {
         return None(u8);
     } else {
-        return Some(u8, LSlice_get_unsafe(b->slice));
+        return Some(u8, LSlice_get_unsafe(b->lslice));
     }
 }
 
 // Returns true if done, false if buffer is full.
 static
 bool Buffer_putc(Buffer *b, unsigned char c) {
-    size_t startpos = b->slice.startpos;
+    size_t startpos = b->lslice.startpos;
     if (startpos < b->size) {
-        b->slice.data[startpos] = c;
-        size_t newpos = b->slice.startpos + 1;
-        b->slice.startpos = newpos;
+        b->lslice.data[startpos] = c;
+        size_t newpos = b->lslice.startpos + 1;
+        b->lslice.startpos = newpos;
         // XX is this bad design? Have 2 kinds of buffers, or?:
-        if (b->slice.endpos < newpos) {
-            b->slice.endpos = newpos;
+        if (b->lslice.endpos < newpos) {
+            b->lslice.endpos = newpos;
         }
         return true;
     } else {
