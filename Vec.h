@@ -25,8 +25,10 @@
 #define Vec_T(s)                                \
     __typeof__((s).data[0])
 
-// needs #include "LSlice.h" and DEFTYPE_LSlice_(T)
-#define Vec_LSlice_unsafe(T, s, startpos, endpos)      \
+
+// These need #include "LSlice.h" and DEFTYPE_LSlice_(T)
+
+#define Vec_LSlice_unsafe(T, s, startpos, endpos)        \
     (LSlice_##T) {                                       \
         .startpos = startpos,                            \
         .endpos = endpos,                                \
@@ -40,8 +42,10 @@
         .data = (s).data                                         \
     }
 
-// needs #include "Slice.h" and DEFTYPE_Slice_(T)
-#define Vec_Slice_unsafe(T, s, startpos, endpos)       \
+
+// These need #include "Slice.h" and DEFTYPE_Slice_(T)
+
+#define Vec_Slice_unsafe(T, s, startpos, endpos)         \
     (Slice_##T) {                                        \
         .start = (s).data + (startpos),                  \
         .endpos = (s).data + (endpos)                    \
