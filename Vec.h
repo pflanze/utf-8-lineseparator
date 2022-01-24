@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include "macro-util.h"
-
+#include "Slice.h"
 
 #define Vec_(T) XCAT(Vec_, T)
 
@@ -46,16 +46,16 @@
     }
 
 
-// These need #include "Slice.h" and DEFTYPE_Slice_(T)
+// These need DEFTYPE_Slice_(T)
 
 #define Vec_sub_Slice_unsafe(T, s, startpos, endpos)         \
-    (Slice_##T) {                                            \
+    (Slice_(T)) {                                            \
         .start = (s).data + (startpos),                      \
         .endpos = (s).data + (endpos)                        \
     }
 
 #define Vec_sub_Slice(T, s, startpos, endpos)                \
-    (Slice_##T) {                                            \
+    (Slice_(T)) {                                            \
         .start = (assert((startpos) <= (s).length),          \
                   (s).data + (startpos)),                    \
         .end = (assert((endpos) <= (s).length),              \
@@ -63,7 +63,7 @@
     }
 
 #define Vec_to_Slice(T, s)                                   \
-    (Slice_##T) {                                            \
+    (Slice_(T)) {                                            \
         .start = (s).data,                                   \
         .end = (s).data + (s).length                         \
     }

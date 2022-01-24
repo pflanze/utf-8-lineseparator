@@ -6,9 +6,6 @@
 #ifndef SLICE_H_
 #define SLICE_H_
 
-#include <stdlib.h>
-
-
 /*
 
   A Slice is representing a subsection of an Vec, borrowing the
@@ -21,11 +18,18 @@
 
  */
 
+
+#include <stdlib.h>
+#include "macro-util.h"
+
+
+#define Slice_(T) XSTR(Slice_, T)
+
 #define DEFTYPE_Slice_(T)                       \
     typedef struct {                            \
         T *start;                               \
         T *end;                                 \
-    } Slice_##T;
+    } Slice_(T);
 
 #define Slice_length(s)                         \
     ((s).end - (s).start)
