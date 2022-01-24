@@ -45,13 +45,13 @@
 
 // These need #include "Slice.h" and DEFTYPE_Slice_(T)
 
-#define Vec_Slice_unsafe(T, s, startpos, endpos)         \
-    (Slice_##T) {                                        \
-        .start = (s).data + (startpos),                  \
-        .endpos = (s).data + (endpos)                    \
+#define Vec_sub_Slice_unsafe(T, s, startpos, endpos)         \
+    (Slice_##T) {                                            \
+        .start = (s).data + (startpos),                      \
+        .endpos = (s).data + (endpos)                        \
     }
 
-#define Vec_Slice_safer(T, s, startpos, endpos)              \
+#define Vec_sub_Slice(T, s, startpos, endpos)                \
     (Slice_##T) {                                            \
         .start = (assert((startpos) <= (s).length),          \
                   (s).data + (startpos)),                    \

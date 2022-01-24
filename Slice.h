@@ -14,7 +14,7 @@
   A Slice is representing a subsection of an Vec, borrowing the
   latter's data.
 
-  See `Vec_Slice_unsafe` and `Vec_Slice_safer` in `Vec.h`.
+  See `Vec_sub_Slice_unsafe` and `Vec_sub_Slice` in `Vec.h`.
 
   See `LSlice.h` for a variant that carries around the original
   base pointer at the cost of a 3rd field.
