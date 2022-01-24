@@ -59,6 +59,12 @@
                 (s).data + (endpos))                         \
     }
 
+#define Vec_to_Slice(T, s)                                   \
+    (Slice_##T) {                                            \
+        .start = (s).data,                                   \
+        .end = (s).data + (s).length                         \
+    }
+
 
 #define Vec_for_each(T, var, vec, body)         \
     for (size_t _Vec_for_each_i = 0;            \
