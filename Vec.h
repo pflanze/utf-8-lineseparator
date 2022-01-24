@@ -60,4 +60,26 @@
     }
 
 
+#define Vec_for_each(T, var, vec, body)         \
+    for (size_t _Vec_for_each_i = 0;            \
+         _Vec_for_each_i < (vec).length;        \
+         _Vec_for_each_i++) {                   \
+        T var = (vec).data[_Vec_for_each_i];    \
+        body;                                   \
+    }
+
+#define Vec_for_each_ptr(T, var, vec, body)     \
+    for (size_t _Vec_for_each_i = 0;            \
+         _Vec_for_each_i < (vec).length;        \
+         _Vec_for_each_i++) {                   \
+        T *var = &(vec).data[_Vec_for_each_i];  \
+        body;                                   \
+    }
+
+// ^ XX Bummer: can the approach from video solve it to avoid body
+// argument? var has to be inside the block, otherwise access out of
+// bounds. (If macros had ability to define macros, then var access
+// could be defined as a macro.)
+
+
 #endif /* VEC_H_ */
