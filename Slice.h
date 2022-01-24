@@ -11,10 +11,10 @@
 
 /*
 
-  A Slice is representing a subsection of an Array, borrowing the
+  A Slice is representing a subsection of an Vec, borrowing the
   latter's data.
 
-  See `Array_Slice_unsafe` and `Array_Slice_safer` in `Array.h`.
+  See `Vec_Slice_unsafe` and `Vec_Slice_safer` in `Vec.h`.
 
   See `LSlice.h` for a variant that carries around the original
   base pointer at the cost of a 3rd field.

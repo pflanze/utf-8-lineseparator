@@ -11,10 +11,10 @@
 
 /*
 
-  An LSlice is representing a subsection of an Array, borrowing the
+  An LSlice is representing a subsection of an Vec, borrowing the
   latter's data.
 
-  See `Array_LSlice_unsafe` and `Array_LSlice_safer` in `Array.h`.
+  See `Vec_LSlice_unsafe` and `Vec_LSlice_safer` in `Vec.h`.
 
   See `LSlice.h` for a slice that has just 2, not 3 fields.
  */
