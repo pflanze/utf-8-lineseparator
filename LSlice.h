@@ -6,9 +6,6 @@
 #ifndef LSLICE_H_
 #define LSLICE_H_
 
-#include <stdlib.h>
-
-
 /*
 
   An LSlice is representing a subsection of an Vec, borrowing the
@@ -19,12 +16,19 @@
   See `LSlice.h` for a slice that has just 2, not 3 fields.
  */
 
+
+#include <stdlib.h>
+#include "macro-util.h"
+
+
+#define LSlice_(T) XCAT(LSlice_, T)
+
 #define DEFTYPE_LSlice_(T)                       \
     typedef struct {                            \
         size_t startpos;                        \
         size_t endpos;                          \
         T *data;                                \
-    } LSlice_##T;
+    } LSlice_(T);
 
 #define LSlice_length(s)                         \
     ((s).endpos - (s).startpos)

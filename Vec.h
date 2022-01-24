@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "macro-util.h"
 #include "Slice.h"
+#include "LSlice.h"
 
 #define Vec_(T) XCAT(Vec_, T)
 
@@ -32,14 +33,14 @@
 // These need #include "LSlice.h" and DEFTYPE_LSlice_(T)
 
 #define Vec_LSlice_unsafe(T, s, startpos, endpos)        \
-    (LSlice_##T) {                                       \
+    (LSlice_(T)) {                                       \
         .startpos = startpos,                            \
         .endpos = endpos,                                \
         .data = (s).data                                 \
     }
 
 #define Vec_LSlice_safer(T, s, startpos, endpos)                 \
-    (LSlice_##T) {                                               \
+    (LSlice_(T)) {                                               \
         .startpos = (assert(startpos <= (s).length), startpos),  \
         .endpos = (assert(endpos <= (s).length), endpos)         \
         .data = (s).data                                         \
