@@ -7,14 +7,17 @@
 #define VEC_H_
 
 #include <stdlib.h>
+#include "macro-util.h"
 
+
+#define Vec_(T) XCAT(Vec_, T)
 
 #define DEFTYPE_Vec_(T)                         \
     typedef struct {                            \
         bool needs_freeing;                     \
         size_t length;                          \
         T *data                                 \
-    } Vec_##T;
+    } Vec_(T);
 
 
 #define Vec_release(s)                          \
